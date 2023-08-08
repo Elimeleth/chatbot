@@ -36,7 +36,7 @@ export type Action = {
     return_default?: string; // DECIDE SI RETORNA EL VALOR POR DEFECTO
 }
 
-export type Callback<T> = (message: Message, ctx?: Command, err?: Error|unknown) => T;                                                                   
+export type Callback<T> = (message: Message  & { extra: string[] }, ctx?: Command, err?: Error|unknown) => T;                                                                   
 
 
 export interface PipeChat {

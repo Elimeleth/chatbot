@@ -130,7 +130,10 @@ export class ChatFactory<T> implements BaseChat<T> {
     }
 
     async call(input: string, event: Message) {
-        const { command } = this.searchIntentOrFail(input) as { command: Command, intent: RegExpMatchArray | null }
+        const { command, intent } = this.searchIntentOrFail(input) as { command: Command, intent: RegExpMatchArray | null }
+
+        // @ts-ignore
+        event.extra = event.body.replace(new RegExp(intent[0], 'gim'), '').trim().split(' ').filter((word) => Boolean(word))
 
         if (command.captureFunction) return command.captureFunction(command)
 

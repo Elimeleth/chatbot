@@ -4,6 +4,14 @@ export function assertIsString(value: unknown): asserts value is string {
     }
 }
 
+export function assertKeysNotNullOrUndefined(obj: any, keys: string[]) {
+  for (const key of keys) {
+    if (obj[key] == null) {
+      throw new Error(`Key "${key}" does not exist or is null/undefined`);
+    }
+  }
+}
+
 export function assertArrayLength<T>(arr: T[], length: number): asserts arr is T[] & { length: typeof length } {
     if (arr.length !== length) {
       throw new Error(`Expected array of length ${length}, but got array of length ${arr.length}`);

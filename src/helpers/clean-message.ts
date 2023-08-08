@@ -24,6 +24,7 @@ const chars: any = {
 
 
 export const clean = ( /** @type {string} */ message: string): string => {
+    message = message.split(' ').filter((word) => Boolean(word.trim())).join(' ');
     let sanity_msg /** @type {string} */ = message;
     for (let letter of sanity_msg) {
         if (chars[letter]) {
@@ -32,5 +33,5 @@ export const clean = ( /** @type {string} */ message: string): string => {
         }
     }
 
-    return sanity_msg.startsWith('cambiar') ? sanity_msg.trim() : sanity_msg.toLowerCase().trim();
+    return sanity_msg.toLowerCase().replace(/(\n|\b|\s)/gim, '').trim();
 };
