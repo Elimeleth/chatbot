@@ -1,12 +1,18 @@
+import chai from "chai"
+
 export function assertIsString(value: unknown): asserts value is string {
     if (typeof value !== 'string') {
       throw new Error(`${value} must be a string`);
     }
 }
 
-export function assertKeysNotNullOrUndefined(obj: any, keys: string[]) {
+export function assertKeysNotNullOrUndefined(obj: any, keys: string[], optional: boolean = false) {
   for (const key of keys) {
-    if (obj[key] == null) {
+    if (optional) {
+      if (!keys.some(key => Boolean(obj[key]))) {
+        throw new Error(`Key "${key}" does not exist or is null/undefined`);
+      }
+    }else if (obj[key] == null) {
       throw new Error(`Key "${key}" does not exist or is null/undefined`);
     }
   }
@@ -28,4 +34,8 @@ export function assert(condition: boolean, message?: string): asserts condition 
     if (!condition) {
       throw new Error(message || 'Assertion failed');
     }
+}
+
+export function assertLength(item: any, length: number, message: string) {
+  chai.assert.lengthOf(item, length, message)
 }

@@ -134,14 +134,17 @@ export class ChatFactory<T> implements BaseChat<T> {
 
         // @ts-ignore
         event.extra = event.body.replace(new RegExp(intent[0], 'gim'), '').trim().split(' ').filter((word) => Boolean(word))
-
+        // @ts-ignore
+        event.phone = event.from.split("@")[0]
+        
         if (command.captureFunction) return command.captureFunction(command)
 
         command.fallbacks?.forEach(fallback => {
             try {
                 return fallback(event, command)
             } catch (e: any) {
-                return fallback(null, new Error(e.message))
+                console.log('fallback error:', e)
+                return fallback(null, null, new Error(e.message))
             }
         })
 

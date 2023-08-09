@@ -21,6 +21,7 @@ export type Command = {
     MessageSendOptions?: MessageSendOptions; // PARA FUTURAS VALIDACIONES
     fallbacks?: any[];
     call: () => Promise<APIResponse|null>;
+    form?: any;
     captureFunction?: any|undefined;
     return_direct?: boolean; // DECIDE SI RETORNA DIRECTO UNA VEZ ENCUENTRE EL COMANDO
     value_return?: Partial<z.infer<typeof value_return>>; // VALIDA EL VALOR QUE RETORNA DE ACUERDO A SU TIPO DE DATO
@@ -29,14 +30,14 @@ export type Command = {
 
 export type Action = {
     name: string; // NOMBRE DE LA ACCION
-    endpoint_url: string; // URL A LA CUAL SE LE PEGARA
+    url: string; // URL A LA CUAL SE LE PEGARA
     method: string; // TIPO DE REQUEST O VERB REQUEST
     data?: any,
-    validate_value_return?: boolean; // VALIDA EL VALOR RETORNADO POR LA REQUEST
-    return_default?: string; // DECIDE SI RETORNA EL VALOR POR DEFECTO
+    // validate_value_return?: boolean; // VALIDA EL VALOR RETORNADO POR LA REQUEST
+    // return_default?: string; // DECIDE SI RETORNA EL VALOR POR DEFECTO
 }
 
-export type Callback<T> = (message: Message  & { extra: string[] }, ctx?: Command, err?: Error|unknown) => T;                                                                   
+export type Callback<T> = (message: Message  & { extra: string[], phone: string }, ctx?: Command, err?: Error|unknown) => T;                                                                   
 
 
 export interface PipeChat {

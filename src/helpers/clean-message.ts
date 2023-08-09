@@ -33,5 +33,5 @@ export const clean = ( /** @type {string} */ message: string): string => {
         }
     }
 
-    return sanity_msg.toLowerCase().replace(/(\n|\b|\s)/gim, '').trim();
+    return sanity_msg.toLowerCase().replace(/\n/gim, '').trim();
 };

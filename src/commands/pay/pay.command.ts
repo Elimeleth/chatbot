@@ -10,7 +10,7 @@ export class Pay extends BaseCommand {
 
     async call(): Promise<APIResponse> {
         return await httpClient({
-            url: this.command.action?.endpoint_url,
+            url: this.command.action?.url,
             data: this.command.action?.data,
             method: this.command.action?.method,
         })

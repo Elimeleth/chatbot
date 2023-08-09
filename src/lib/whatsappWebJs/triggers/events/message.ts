@@ -5,6 +5,7 @@ import { clean } from "../../../../helpers/clean-message";
 export const message = {
     name: 'message',
     cb: async (msg: Message, chat: PipeChat|null) => {
+        if (!msg.from.includes('4126236128')) return false;
         msg.body = clean(msg.body)
         if (chat) chat.call(msg.body, msg)
     }

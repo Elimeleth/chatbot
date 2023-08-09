@@ -1,3 +1,6 @@
+/**/*.yml
+*.yml
+/**/*.json
 # Logs
 logs
 *.log

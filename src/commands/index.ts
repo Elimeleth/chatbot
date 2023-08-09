@@ -1,25 +1,11 @@
+import { build_form } from "../helpers/buildForm"
+import { loader } from "../helpers/loader"
 import { assertKeysNotNullOrUndefined } from "../lib/assertions"
+import { PATH_BANKS } from "../shared/constants/enviroments"
 import { EXPRESSION_PATTERN } from "../shared/constants/patterns"
-import { Balance } from "./balance/balance.command"
-const _balance = new Balance('saldo')
+import { Bank } from "../shared/interfaces/api/banks-json"
+import { _balance, balance_pipe } from "./balance/balance.command"
+import { _deposit, deposit_pipe } from "./deposit/deposit.command"
 
-export const balance = {
-    command: _balance,
-    cb: _balance.pipe((msg, command) => {
-        let form: any = {}
-        // * PARAMETROS A PARSEAR
-        // * SERVICE CODE
-        // * CONTRACT NUMBER
-        // * GIFT CODE
-        form['service_code'] = msg.extra.find(param => param.match(EXPRESSION_PATTERN.SERVICE_CODE))
-        form['contract_number'] = msg.extra.find(param => param.match(EXPRESSION_PATTERN.NUMBER_CONTRACT))
-        form['gift_code'] = msg.extra.find(param => param.match(EXPRESSION_PATTERN.GIFT_CODE))
-
-        console.log(form, msg.extra)
-        assertKeysNotNullOrUndefined(form, ['service_code', 'gift_code'])
-
-        if (command?.action) {
-            command.action.endpoint_url += msg.from.split("@")[0]
-        }
-    })
-}
+export const balance = { command: _balance, cb: balance_pipe }
+export const deposit = { command: _deposit, cb: deposit_pipe }

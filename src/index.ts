@@ -1,8 +1,8 @@
-import { balance } from "./commands";
-import { Balance } from "./commands/balance/balance.command";
+import { balance, deposit } from "./commands";
 import { ChatFactory } from "./lib";
 import { WhatsAppWebService } from "./lib/whatsappWebJs";
 import { EVENTS } from "./lib/whatsappWebJs/triggers";
+import { logger } from "./services/logs/winston.log";
 
 // [x] Crear loop principal
 // [x] Agregar comandos
@@ -18,18 +18,23 @@ import { EVENTS } from "./lib/whatsappWebJs/triggers";
 // [ ] Agregar evaluator
 
 const mainLoop = async () => {
-    const service = new WhatsAppWebService('Biyuyo Bot').daemon()
-    service.attachEvents(EVENTS)
-    
-    // * ================================================================
-    const chat = new ChatFactory(service.bot_name, service)
-    chat.addCommand(balance.command).useFunction(balance.cb)
-    // * ================================================================
-    
-    
-    
-    service.pipe(chat)
-    chat.listen()
+    try {
+        const service = new WhatsAppWebService('Biyuyo Bot').daemon()
+        service.attachEvents(EVENTS)
+
+        // * ================================================================
+        const chat = new ChatFactory(service.bot_name, service)
+        chat
+            .addCommand(balance.command).useFunction(balance.cb)
+            .addCommand(deposit.command).useFunction(deposit.cb)
+        // * ================================================================
+
+        service.pipe(chat)
+        chat.listen()
+
+    } catch (error) {
+        console.log({ error })
+    }
 }
 
 mainLoop()

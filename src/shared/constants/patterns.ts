@@ -15,4 +15,5 @@ export const EXPRESSION_PATTERN = {
     TYPEBOLET: /(VIP|NORMAL)/gim,
     BANK_REFERENCE: /[0-9]{4,}/gm,
     BANK: /[a-zA-Z]{3,}/gim,
+    BANK_AMOUNT: /\d{1,3}(?:\.\d{2,3})*(?:,\d{2})?/gi
 }

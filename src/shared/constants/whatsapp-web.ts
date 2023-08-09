@@ -1,14 +1,14 @@
 import { ClientOptions, LocalAuth, NoAuth } from "whatsapp-web.js";
 import { PUPPETEER_ARGS_FLAGS } from "./puppeteer";
 
-export const WEB_VERSION = process.env.WEB_VERSION || '2.2315.6'
+export const WEB_VERSION = '2.2332.15'
 // RUTA DONDE SE MANEJA EL GUARDADO DE SESIONES WORKERS
 // const dataPath: string = './dist/src/.wwebjs_auth';
 
 // BUSCA CREDENCIALES DE SESION Y LA REUTILIZA
 const AUTHSTRATEGY: {LocalAuth: LocalAuth, NoAuth: NoAuth} = {
     LocalAuth: new LocalAuth({
-        clientId:  process.argv[2] || 'biyuyo',
+        clientId:  process.argv[2] || 'bot',
     }),
     NoAuth: new NoAuth()
 };

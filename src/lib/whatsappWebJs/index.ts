@@ -14,7 +14,7 @@ export class WhatsAppWebService extends BaseChatService {
     }
     
     get version () {
-        return this.client.getWWebVersion().then(version => version.toString()).catch(err => console.log(err));
+        return this.client.getWWebVersion()
     }
 
     private init () {
@@ -25,8 +25,11 @@ export class WhatsAppWebService extends BaseChatService {
         return this
     }
 
-    listen() {
-        return this.client.initialize()
+    async listen() {
+        const service = await this.client.initialize()
+        console.log(`*** USING WHATSAPP WEB VERSION ${await this.version} ***`)
+
+        return service
     }
 
 
