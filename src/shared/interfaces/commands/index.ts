@@ -15,5 +15,5 @@ export abstract class BaseCommand {
 
     abstract pipe<T>(cb: Callback<T>): any
     abstract build (): Command
-    abstract call(): Promise<APIResponse>
+    abstract call: () => Promise<APIResponse|null>
 }

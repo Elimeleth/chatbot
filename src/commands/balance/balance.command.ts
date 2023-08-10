@@ -4,7 +4,7 @@ import { assertKeysNotNullOrUndefined } from "../../lib/assertions";
 import { httpClient } from "../../services/http";
 import { URL_SALDO } from "../../shared/constants/enviroments";
 import { EXPRESSION_PATTERN } from "../../shared/constants/patterns";
-import { APIResponse } from "../../shared/interfaces/api/fetch-response";
+import { APIResponse, STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
 
@@ -13,12 +13,13 @@ class Balance extends BaseCommand {
         key: this._name,
         intents: ['mi_saldo', 'consultar_saldo', 'consultar', 'bs', 'saldo', 'balance', 'dinero'],
         action: {
-            name: this._name,
             url: URL_SALDO,
             method: "GET"
         },
         call: () => new Promise((resolve, _) => resolve(null))
     }
+
+    call = async () => await httpClient(this.command.action)
 
     constructor (name: string) {
         super(name)
@@ -28,10 +29,7 @@ class Balance extends BaseCommand {
         return cb
     }
 
-    async call(): Promise<APIResponse> {
-        // @ts-ignore
-        return await httpClient(this.command.action)
-    }
+    
 
     build(): Command {
         return {
@@ -75,18 +73,18 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
             msg.extra
         )
     }
-    
-    await new Promise((resolve, reject) => {
+
+    try {
         assertKeysNotNullOrUndefined(command.form, ['service_code', 'gift_code'], true)
         // @ts-ignore
         command.action.url += msg.phone
-        resolve(true)
-    }).catch((error) => {
-        console.log(error)
+        command.call = _balance.call
+    }catch (e: any) { 
+        console.log({ message_error: e.message})
         command.call = async () => await new Promise((resolve) => resolve({
             message: loader("CONSULT"),
-            status_response: "failed"
+            status_response: STATUS_RESPONSE_FAILED
         }))
-    }) as Promise<APIResponse>
+    }
 })
     

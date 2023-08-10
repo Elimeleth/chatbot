@@ -137,19 +137,17 @@ export class ChatFactory<T> implements BaseChat<T> {
         // @ts-ignore
         event.phone = event.from.split("@")[0]
         
-        if (command.captureFunction) return command.captureFunction(command)
-
-        command.fallbacks?.forEach(fallback => {
+        command.fallbacks?.map(async fallback => {
             try {
-                return fallback(event, command)
+                await fallback(event, command)
             } catch (e: any) {
                 console.log('fallback error:', e)
-                return fallback(null, null, new Error(e.message))
+                await fallback(null, null, new Error(e.message))
             }
         })
 
         // if (command?.action?.validate_value_return) value_return.parse(command.value_return)
-
+        console.log({ command })
         const retrieve = await command.call()
         console.log({retrieve})
         assert(!!(retrieve?.message), "Response must dont be empty")

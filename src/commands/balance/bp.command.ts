@@ -4,17 +4,22 @@ import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
 
 export class Bp extends BaseCommand {
-    constructor (name: string, private command: Command) {
+    private command: Command = {
+        key: "puntos",
+        intents: [],
+        action: {
+            url: "",
+            method: "GET",
+        },
+        call: async () => await new Promise((resolve, reject) => resolve(null))
+    }
+
+    call = async () => await httpClient(this.command.action)
+    
+    constructor (name: string) {
         super(name)
     }
 
-    async call(): Promise<APIResponse> {
-        return await httpClient({
-            url: this.command.action?.url,
-            data: this.command.action?.data,
-            method: this.command.action?.method,
-        })
-    }
     
     pipe<T>(cb: Callback<T>) {
         throw new Error("Method not implemented.");

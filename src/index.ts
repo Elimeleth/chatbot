@@ -26,7 +26,7 @@ const mainLoop = async () => {
         const chat = new ChatFactory(service.bot_name, service)
         chat
             .addCommand(balance.command).useFunction(balance.cb)
-            .addCommand(deposit.command).useFunction(deposit.cb)
+            .addCommand(deposit.command).useFunction(deposit.cb).useFunction(deposit.capture)
         // * ================================================================
 
         service.pipe(chat)

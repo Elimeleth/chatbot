@@ -2,6 +2,7 @@ import z from "zod"
 import { APIResponse } from "../api/fetch-response";
 import { Message, MessageContent, MessageSendOptions } from "whatsapp-web.js";
 import { BaseCommand } from "../commands";
+import { AxiosRequestConfig } from "axios";
 
 export const value_return = z.object({
     quantity: z.number().describe('quantities of product').default(0),
@@ -25,7 +26,7 @@ export type Command = {
     captureFunction?: any|undefined;
     return_direct?: boolean; // DECIDE SI RETORNA DIRECTO UNA VEZ ENCUENTRE EL COMANDO
     value_return?: Partial<z.infer<typeof value_return>>; // VALIDA EL VALOR QUE RETORNA DE ACUERDO A SU TIPO DE DATO
-    action?: Action // ACCION A REALIZAR
+    action: AxiosRequestConfig // ACCION A REALIZAR
 }
 
 export type Action = {
@@ -45,11 +46,11 @@ export interface PipeChat {
 }
 
 export abstract class BaseChat<T> {
-    // abstract addCapture(command: Commands): this   
+    abstract addCapture<T>(callback: Callback<T> | null): this   
     abstract addCommand<BaseCommand>(command: Command|BaseCommand): this
     abstract useFunction<T>(callback: Callback<T>): this
     abstract addIntentToCommand(key: string, intent: string): this
-    abstract addActionToCommand(key: string, action: Action): this
+    abstract addActionToCommand(key: string, action: AxiosRequestConfig): this
     
     abstract call(input: string, event?: any): Promise<any>
 }
