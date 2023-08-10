@@ -1,7 +1,6 @@
-import { Message } from "whatsapp-web.js";
-import { build_form } from "../../helpers/buildForm";
+import { build_form } from "../../helpers/util";
 import { loader } from "../../helpers/loader";
-import { assertKeysNotNullOrUndefined } from "../../lib/assertions";
+import { assert, assertKeysNotNullOrUndefined } from "../../lib/assertions";
 import { buildFormData } from "../../services/form/form-data";
 import { httpClient } from "../../services/http";
 import { PATH_BANKS, URL_DEPOSITAR } from "../../shared/constants/enviroments";
@@ -10,6 +9,7 @@ import { Bank, STATUS_BANK_AVAILABLE } from "../../shared/interfaces/api/banks-j
 import { APIResponse, STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
+import { WARNING_REACTION } from "../../shared/constants/reactions";
 
 class Deposit extends BaseCommand {
     private command: Command = {
@@ -44,7 +44,6 @@ class Deposit extends BaseCommand {
 export const _deposit = new Deposit('depositar')
 export const deposit_pipe = _deposit.pipe(async (msg, command) => {
     if (!msg || !command) return false
-
     if ((msg && !msg.extra.length)) {
         command.call = async () => {
             return {
@@ -60,17 +59,20 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
     
     const bank_filter = (param: string, idx?: number) => !!(param.match(EXPRESSION_PATTERN.SERVICE_CODE)) && banks.some(
         bank => bank.mini.toLowerCase().replace('pm', '') === param
-        && bank.status === STATUS_BANK_AVAILABLE
+        // && bank.status === STATUS_BANK_AVAILABLE
     )
 
     const bank_code = (values: string[]) => {
         for (const value of values) {
-            if (bank_filter(value)) return banks.filter(bank => bank.mini.toLowerCase().replace('pm', '') === value)[0].code
+            if (bank_filter(value)) {
+                msg.extra = msg.extra.filter(e => e !== value)
+                return banks.find(bank => bank.mini.toLowerCase().replace('pm', '') === value)?.code as string
+            }
         }
         return ''
     }
 
-    command.form = build_form(
+    const { extra, form } = build_form(
         command.form || {},
         [
             {
@@ -90,18 +92,25 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
         ],
         msg.extra
     )
-
+    command.form = form
     try {
+        
         assertKeysNotNullOrUndefined(command.form, ['bank_account_application', 'bank_reference', 'amount'])
+        assert(banks.some(bank => bank.code === command.form.bank_account_application && bank.status === STATUS_BANK_AVAILABLE), loader("BOT_ERROR_BANK_UNAVAILABLE"))
+        
+        command.invalid_data = extra.filter(e => msg.extra.includes(e))        
+        assert(!extra.length, loader("INVALID_DATA") + ` *${extra.join(',')}*`)
+
         // @ts-ignore
         command.action.data = buildFormData(command.form)
         command.call = _deposit.call
+
     }catch (e: any) {
-        command.call = async () => {
-            return {
-                message: loader("HOW_DEPOSIT"),
-                status_response: STATUS_RESPONSE_FAILED}
-        }
+        command.call = async () => await new Promise((resolve) => resolve({
+            message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("HOW_DEPOSIT"),
+            status_response: STATUS_RESPONSE_FAILED,
+            react: WARNING_REACTION
+        }))
     }
 })
 

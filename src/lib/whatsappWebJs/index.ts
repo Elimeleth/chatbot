@@ -72,13 +72,15 @@ export class WhatsAppWebService extends BaseChatService {
     async send(to: string, message: MessageContent, messageSendOptions: MessageSendOptions) {
         assert(to.includes("@c.us"), "to must include @c.us")
 
-        await delay(3000)
+        await delay(1500)
         await this.client.sendPresenceAvailable()
-        await this.status('seen', to)
         await this.status('typing', to)
-        await delay(2000)
+        await delay(1500)
 
-        const ack = this.client.sendMessage(to, message, messageSendOptions || undefined)
+        const ack = this.client.sendMessage(to, message, {
+            sendSeen: true,
+            ...messageSendOptions
+        })
 
         await this.status('stop', to)
         await this.client.sendPresenceUnavailable()

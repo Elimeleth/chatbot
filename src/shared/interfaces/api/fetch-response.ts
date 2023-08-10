@@ -1,6 +1,7 @@
 export interface APIResponse {
 	message: string;
 	status_response: typeof STATUS_RESPONSE_FAILED | typeof STATUS_RESPONSE_SUCCES;
+	react?: string;
 	id?: string;
 	type?: string;
 	code?: string;

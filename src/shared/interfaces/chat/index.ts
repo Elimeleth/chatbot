@@ -22,6 +22,7 @@ export type Command = {
     MessageSendOptions?: MessageSendOptions; // PARA FUTURAS VALIDACIONES
     fallbacks?: any[];
     call: () => Promise<APIResponse|null>;
+    invalid_data?: string[];
     form?: any;
     captureFunction?: any|undefined;
     return_direct?: boolean; // DECIDE SI RETORNA DIRECTO UNA VEZ ENCUENTRE EL COMANDO

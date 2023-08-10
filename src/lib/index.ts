@@ -4,6 +4,8 @@ import { assert, assertArray } from "./assertions";
 import { BaseCommand } from "../shared/interfaces/commands";
 import { Message } from "whatsapp-web.js";
 import { APIResponse } from "../shared/interfaces/api/fetch-response";
+import { clean } from "../helpers/util";
+import { FAST_REACTION, WAITING_REACTION } from "../shared/constants/reactions";
 
 export class ChatFactory<T> implements BaseChat<T> {
     private commands: Command[] = [];
@@ -130,7 +132,8 @@ export class ChatFactory<T> implements BaseChat<T> {
     }
 
     async call(input: string, event: Message) {
-        const { command, intent } = this.searchIntentOrFail(input) as { command: Command, intent: RegExpMatchArray | null }
+        await event.react(WAITING_REACTION)
+        const { command, intent } = this.searchIntentOrFail(clean(input)) as { command: Command, intent: RegExpMatchArray | null }
 
         // @ts-ignore
         event.extra = event.body.replace(new RegExp(intent[0], 'gim'), '').trim().split(' ').filter((word) => Boolean(word))
@@ -141,7 +144,6 @@ export class ChatFactory<T> implements BaseChat<T> {
             try {
                 await fallback(event, command)
             } catch (e: any) {
-                console.log('fallback error:', e)
                 await fallback(null, null, new Error(e.message))
             }
         })
@@ -149,12 +151,14 @@ export class ChatFactory<T> implements BaseChat<T> {
         // if (command?.action?.validate_value_return) value_return.parse(command.value_return)
         console.log({ command })
         const retrieve = await command.call()
-        console.log({retrieve})
+        
         assert(!!(retrieve?.message), "Response must dont be empty")
 
-        const { message, status_response } = retrieve as unknown as APIResponse
-
+        const { message, status_response, react } = retrieve as unknown as APIResponse
+        console.log({message, status_response, react})
+        
         this.service.send(event.from, message, command.MessageSendOptions)
+        await event.react(react || FAST_REACTION)
     }
 
 }
