@@ -6,6 +6,7 @@ export type Service = {
   recharge: boolean;
   maintenance: boolean;
   pin: boolean;
+  validate_amount: boolean;
   isConsultable: boolean;
   especial_amount: any[];
 };
