@@ -9,6 +9,7 @@ import { Service } from "../../shared/interfaces/api/services-json";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
 import { WARNING_REACTION } from "../../shared/constants/reactions";
+import { service_code, services } from "../../helpers/commands";
 
 class Balance extends BaseCommand {
     private command: Command = {
@@ -58,13 +59,11 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
             // contract_number: msg.extra.find(param => param.match(EXPRESSION_PATTERN.NUMBER_CONTRACT)),
             // gift_code: msg.extra.find(param => param.match(EXPRESSION_PATTERN.GIFT_CODE))
 
-            let codes = loader(null, PATH_FILE_SERVICES_CODES) as Service[]
-
             const services_codes = (values: string[]) => {
                 for (const value of values) {
-                    if (codes.some(service => service.name === value.toUpperCase())) {
+                    if (services.some(service => service.name === value.toUpperCase())) {
                         msg.extra = msg.extra.filter(e => e !== value)
-                        return codes.find(code => code.name === value.toUpperCase())?.service_code as string
+                        return services.find(code => code.name === value.toUpperCase())?.service_code as string
                     }
                 }
 
@@ -92,18 +91,18 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
                 msg.extra
             )
             command.form = form
-            const service = codes.find(code => code.service_code === command.form.service_code) as Service
+            const service = service_code((code: any) => code.service_code === command.form.service_code) as any
             assertKeysNotNullOrUndefined(command.form, ['service_code', 'gift_code'], true)
             assert(!command.form.gift_code && findKeyOrFail(command.form, ['service_code', 'contract_number']), loader("BOT_ERROR_NOT_SERVICE_OR_CONTRACT"))
-            assert(service.recharge && !command.form.contract_number.match(new RegExp(service.code)), loader("BOT_ERROR_MOVIL_NOT_MATCH"))
+            assert(service.recharge && !command.form.contract_number.match(new RegExp(service.code, 'gim')), loader("BOT_ERROR_MOVIL_NOT_MATCH"))
             assert(command.form.service_code && service.isConsultable)
 
             command.invalid_data = extra.filter(e => msg.extra.includes(e))        
-            assert(!extra.length, loader("INVALID_DATA") + ` *${extra.join(',')}*`)
+            assert(!command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data.join(',')}*`)
         }
         
         const queries = objectToString(command.form)
-        // @ts-ignore
+        
         command.action.url = queries.includes('service_code')
             ? URL_SALDO_OPERATOR + objectToString(command.form)
             : command.action.url += queries
@@ -116,5 +115,7 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
+
+        command.action.data = null
     }
 })

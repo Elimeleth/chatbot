@@ -1,4 +1,4 @@
-import { balance, deposit } from "./commands";
+import { balance, deposit, pay } from "./commands";
 import { ChatFactory } from "./lib";
 import { WhatsAppWebService } from "./lib/whatsappWebJs";
 import { EVENTS } from "./lib/whatsappWebJs/triggers";
@@ -27,6 +27,7 @@ const mainLoop = async () => {
         chat
             .addCommand(balance.command).useFunction(balance.cb)
             .addCommand(deposit.command).useFunction(deposit.cb).useFunction(deposit.capture)
+            .addCommand(pay.command).useFunction(pay.cb).useFunction(pay.capture)
         // * ================================================================
 
         service.pipe(chat)

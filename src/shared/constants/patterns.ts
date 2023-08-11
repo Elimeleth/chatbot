@@ -1,10 +1,10 @@
 export const EXPRESSION_PATTERN = {
     ACTIVE_CODE: /[0-9]*/g,
-    SERVICE_CODE: /^[a-zA-Z]{0,}$/gi,
+    SERVICE_CODE: /^[a-zA-Z\s]{0,}/gim,
     SERVICE_BALANCE: /(412)/gi,
     SERVICE_AMOUNT: /^([0-9]{0,3}){0,2}(,|\.)?\d{0,2}$/g, // 250000 => 6 | 123456 => ref 6
     NUMBER_PHONE: /(0|58)?(412|416|414|424|426|242)\d{7}/g, // /412|416|414|424|426/g,
-    CODE_NUMBER_PHONE: /412|416|414|424|426/g, // /412|416|414|424|426/g, 
+    CODE_NUMBER_PHONE: /(412|416|414|424|426)/g, // /412|416|414|424|426/g, 
     NUMBER_CONTRACT: /#?([0-9]{7,15})$/g,
     GIFT_CODE: /(?=(.*[0-9])).(?=(.*[a-z]))[a-z0-9]{1,}/gi,
     NUMBER_OPERATION: /#?([0-9]{10,15})/g,

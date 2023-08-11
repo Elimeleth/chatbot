@@ -6,7 +6,7 @@ import { httpClient } from "../../services/http";
 import { PATH_BANKS, URL_DEPOSITAR } from "../../shared/constants/enviroments";
 import { EXPRESSION_PATTERN } from "../../shared/constants/patterns";
 import { Bank, STATUS_BANK_AVAILABLE } from "../../shared/interfaces/api/banks-json";
-import { APIResponse, STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
+import { STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
 import { WARNING_REACTION } from "../../shared/constants/reactions";
@@ -99,9 +99,8 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
         assert(banks.some(bank => bank.code === command.form.bank_account_application && bank.status === STATUS_BANK_AVAILABLE), loader("BOT_ERROR_BANK_UNAVAILABLE"))
         
         command.invalid_data = extra.filter(e => msg.extra.includes(e))        
-        assert(!extra.length, loader("INVALID_DATA") + ` *${extra.join(',')}*`)
+        assert(!command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data.join(',')}*`)
 
-        // @ts-ignore
         command.action.data = buildFormData(command.form)
         command.call = _deposit.call
 
@@ -111,6 +110,8 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
+
+        command.action.data = null
     }
 })
 

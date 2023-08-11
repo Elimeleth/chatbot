@@ -65,8 +65,16 @@ const chars: any = {
   Ù: 'U'
 };
 
+export const parse_message_output = (message_to_parse: string, parses: { key: string; value: string;}[]) => {
+  for (const parse of parses) {
+    message_to_parse = message_to_parse.replace(parse.key, parse.value)
+  }
+
+  return message_to_parse
+} 
 
 export const clean = ( /** @type {string} */ message: string): string => {
+  message = message.replace(/(\n|!|\*|_)/g, ' ').trim().toLowerCase()
   message = message.split(' ').filter((word) => Boolean(word.trim())).join(' ');
   let sanity_msg /** @type {string} */ = message;
   for (let letter of sanity_msg) {
