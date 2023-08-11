@@ -10,6 +10,7 @@ import { STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-respon
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
 import { WARNING_REACTION } from "../../shared/constants/reactions";
+import { localDB } from "../../services/localDB";
 
 class Deposit extends BaseCommand {
     private command: Command = {
@@ -110,18 +111,27 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
-
+        command.invalid_data = [];
         command.action.data = null
     }
 })
 
-export const deposit_capture = _deposit.pipe((_, command) => {
+export const deposit_capture = _deposit.pipe((msg, command) => {
     if (!command) return false
     
     const banks = loader(null, PATH_BANKS) as Bank[]
     const bank = command.form.bank_account_application
 
     if (banks.find((bnk) => bnk.code === bank)?.hasPm) {
+        localDB.create({
+            username: command.form.phone,
+            diff: 0,
+            expired_at: 300,
+            thread: 0,
+            payload: {
+                ...command.form
+            }
+        }).then().catch();
         command.call = async () => await new Promise((resolve, _) => {
             resolve({
                 message: loader("TRANSFER_OR_PM"),

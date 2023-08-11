@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { URL_LOCALDB } from '../../shared/constants/enviroments'
 
-export class LocalDB {
+class LocalDB {
     // ? CONEXION CON SERVICIO LOCALDB PARA MANEJO DE DATA CON BORRADO AUTOMATICO
     // ? ENCARGADO DEL MANEJO DE [GET|POST|PUT]
     async findOne (value:string): Promise<any> {
@@ -17,7 +17,7 @@ export class LocalDB {
 
     async create (body:{
         username: string,
-        thread: number,
+        thread?: number,
         diff: number,
         payload?:any,
         expired_at: number
@@ -66,3 +66,5 @@ export class LocalDB {
         return response
     }
 }
+
+export const localDB = new LocalDB();

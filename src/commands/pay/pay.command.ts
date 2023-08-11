@@ -120,7 +120,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
-
+        command.invalid_data = [];
         command.action.data = null
     }
 })
