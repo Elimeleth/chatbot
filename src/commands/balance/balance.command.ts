@@ -91,14 +91,13 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
                 msg.extra
             )
             command.form = form
-            const service = service_code((code: any) => code.service_code === command.form.service_code) as any
+            const service = service_code((code) => code.service_code === command.form.service_code) as Service
             assertKeysNotNullOrUndefined(command.form, ['service_code', 'gift_code'], true)
             assert(!command.form.gift_code && findKeyOrFail(command.form, ['service_code', 'contract_number']), loader("BOT_ERROR_NOT_SERVICE_OR_CONTRACT"))
             assert(service.recharge && !command.form.contract_number.match(new RegExp(service.code, 'gim')), loader("BOT_ERROR_MOVIL_NOT_MATCH"))
-            assert(command.form.service_code && service.isConsultable)
+            assert(command.form.service_code && service.hasConsultOperator)
 
             command.invalid_data = extra.filter(e => msg.extra.includes(e))        
-            assert(!command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data.join(',')}*`)
         }
         
         const queries = objectToString(command.form)

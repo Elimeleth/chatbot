@@ -17,6 +17,10 @@ export class WhatsAppWebService extends BaseChatService {
         return this.client.getWWebVersion()
     }
 
+    get _client () {
+        return this.client
+    }
+
     private init () {
         return new Client(CLIENT_OPTIONS)
     }
@@ -69,7 +73,7 @@ export class WhatsAppWebService extends BaseChatService {
     }
        
 
-    async send(to: string, message: MessageContent, messageSendOptions: MessageSendOptions) {
+    async send(to: string, message: MessageContent, messageSendOptions: MessageSendOptions | undefined) {
         assert(to.includes("@c.us"), "to must include @c.us")
 
         await delay(1500)

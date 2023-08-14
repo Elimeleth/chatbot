@@ -3,15 +3,18 @@ import { Action, BaseChat, BaseChatService, Callback, Command, value_return } fr
 import { assert, assertArray } from "./assertions";
 import { BaseCommand } from "../shared/interfaces/commands";
 import { Message } from "whatsapp-web.js";
-import { APIResponse } from "../shared/interfaces/api/fetch-response";
+import { APIResponse, STATUS_RESPONSE_FAILED } from "../shared/interfaces/api/fetch-response";
 import { clean } from "../helpers/util";
-import { FAST_REACTION, WAITING_REACTION } from "../shared/constants/reactions";
+import { FAST_REACTION, WAITING_REACTION, WARNING_REACTION } from "../shared/constants/reactions";
+import { WhatsAppWebService } from "./whatsappWebJs";
+import { buildFormData } from "../services/form/form-data";
+import { loader } from "../helpers/loader";
 
 export class ChatFactory<T> implements BaseChat<T> {
     private commands: Command[] = [];
     private ctx$ = new BehaviorSubject<Command | null>(null)
 
-    constructor(private bot_name: string, private service: BaseChatService) { }
+    constructor(private bot_name: string, private service: WhatsAppWebService) { }
 
     get name() { return this.bot_name; }
 
@@ -35,8 +38,13 @@ export class ChatFactory<T> implements BaseChat<T> {
         const command_regexp = (intents: string[]) => new RegExp(`${(intents.map(i => i.trim()).join('|'))}`, 'gim')
         const [possible_command, ...rest] = Array.isArray(keyOrIntent) ? keyOrIntent : keyOrIntent.split(' ')
 
-        const command = this.commands.find(c => c.key === possible_command || c.intents.includes(possible_command))
+        const command = this.commands.find(c => 
+            (c.evaluate && c.evaluate(keyOrIntent)) ||
+            (c.key === possible_command || c.intents.includes(possible_command)) ||
+            (c.key === possible_command+rest[0] || c.intents.includes(possible_command+rest[0]))
+        )
 
+        console.log({command})
         if (!command) throw new Error(`Key: (${possible_command}) not found`)
 
         command.user_extra_intent = keyOrIntent.replace(possible_command, '').trim()
@@ -132,13 +140,15 @@ export class ChatFactory<T> implements BaseChat<T> {
     }
 
     async call(input: string, event: Message) {
-        await event.react(WAITING_REACTION)
+        // await event.react(WAITING_REACTION)
         const { command, intent } = this.searchIntentOrFail(clean(input)) as { command: Command, intent: RegExpMatchArray | null }
 
         // @ts-ignore
         event.extra = event.body.replace(new RegExp(intent[0], 'gim'), '').trim().split(' ').filter((word) => Boolean(word))
         // @ts-ignore
         event.phone = event.from.split("@")[0]
+        // @ts-ignore
+        event.client = this.service._client
         
         command.fallbacks?.map(async fallback => {
             try {
@@ -148,15 +158,31 @@ export class ChatFactory<T> implements BaseChat<T> {
             }
         })
 
+        if (command.action.method !== 'GET') {
+            command.action.data = buildFormData(command.form)
+        }
         // if (command?.action?.validate_value_return) value_return.parse(command.value_return)
-        console.log({ command })
-        const retrieve = await command.call()
+        let retrieve: APIResponse|null = null
+
+        try {      
+            // @ts-ignore
+            assert(!command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data.join(',')}*`)
+            console.log({ command })
+            retrieve = await command.call()
+        }catch (e: any) {
+            retrieve = await new Promise((resolve) => resolve({
+                message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("HOW_DEPOSIT"),
+                status_response: STATUS_RESPONSE_FAILED,
+                react: WARNING_REACTION
+            }))
+        }
         
         assert(!!(retrieve?.message), "Response must dont be empty")
 
         const { message, status_response, react } = retrieve as unknown as APIResponse
         console.log({message, status_response, react})
-        
+        command.invalid_data = []
+        command.action.data = null
         this.service.send(event.from, message, command.MessageSendOptions)
         await event.react(react || FAST_REACTION)
     }

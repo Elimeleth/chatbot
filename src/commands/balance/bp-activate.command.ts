@@ -1,14 +1,15 @@
 import { objectToString } from "../../helpers/util";
 import { httpClient } from "../../services/http";
+import { ACTIVATE_POINTS } from "../../shared/constants/api";
 import { URL_PUNTOS } from "../../shared/constants/enviroments";
 import { APIResponse } from "../../shared/interfaces/api/fetch-response";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
 
-class Bp extends BaseCommand {
+class ActivateBp extends BaseCommand {
     private command: Command = {
-        key: "bp",
-        intents: ['mis puntos', 'puntos', 'bp', 'biyuyo puntos', 'points'],
+        key: "activar puntos",
+        intents: ['activar puntos', 'activar bp'],
         action: {
             url: URL_PUNTOS,
             method: "POST",
@@ -35,9 +36,9 @@ class Bp extends BaseCommand {
     }
 }
 
-export const _bp = new Bp('biyuyo puntos')
-export const bp_pipe = _bp.pipe((msg, command) => {
+export const _activateBp = new ActivateBp('activar puntos')
+export const activateBp_pipe = _activateBp.pipe((msg, command) => {
     if (!command) return false
 
-    command.form = { phone: msg.phone }
+    command.form = { phone: msg.phone, type: ACTIVATE_POINTS }
 })

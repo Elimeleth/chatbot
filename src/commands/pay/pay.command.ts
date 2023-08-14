@@ -1,13 +1,12 @@
 import { service_code, services } from "../../helpers/commands";
 import { loader } from "../../helpers/loader";
 import { build_form, parse_message_output } from "../../helpers/util";
-import { assert, assertKeysNotNullOrUndefined } from "../../lib/assertions";
-import { buildFormData } from "../../services/form/form-data";
+import { assert } from "../../lib/assertions";
 import { httpClient } from "../../services/http";
-import { PATH_FILE_SERVICES_AMOUNTS, PATH_FILE_SERVICES_CODES, URL_PAGAR } from "../../shared/constants/enviroments";
+import { PATH_FILE_SERVICES_AMOUNTS, URL_PAGAR } from "../../shared/constants/enviroments";
 import { EXPRESSION_PATTERN } from "../../shared/constants/patterns";
 import { ERROR_INVALID_DATA_REACTION, WARNING_REACTION } from "../../shared/constants/reactions";
-import { APIResponse, STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
+import { STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
 import { Amount } from "../../shared/interfaces/api/services-amounts";
 import { Service } from "../../shared/interfaces/api/services-json";
 import { Callback, Command } from "../../shared/interfaces/chat";
@@ -108,9 +107,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         assert(command.form.contract_number && !service?.recharge && !(command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
 
         command.invalid_data = extra.filter(e => msg.extra.includes(e))
-        assert(!command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data.join(',')}*`)
-
-        command.action.data = buildFormData(command.form)
+       
         command.call = _pay.call
 
     } catch (e: any) {
@@ -120,8 +117,6 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
-        command.invalid_data = [];
-        command.action.data = null
     }
 })
 

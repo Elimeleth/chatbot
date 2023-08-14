@@ -1,21 +1,16 @@
-import { build_form } from "../../helpers/util";
 import { loader } from "../../helpers/loader";
-import { assert, assertKeysNotNullOrUndefined } from "../../lib/assertions";
-import { buildFormData } from "../../services/form/form-data";
+import { assert,  } from "../../lib/assertions";
 import { httpClient } from "../../services/http";
-import { PATH_BANKS, URL_DEPOSITAR } from "../../shared/constants/enviroments";
-import { EXPRESSION_PATTERN } from "../../shared/constants/patterns";
-import { Bank, STATUS_BANK_AVAILABLE } from "../../shared/interfaces/api/banks-json";
+import { URL_DEPOSITAR } from "../../shared/constants/enviroments";
 import { STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
-import { WARNING_REACTION } from "../../shared/constants/reactions";
 import { localDB } from "../../services/localDB";
 
 class DepositRegister extends BaseCommand {
     private command: Command = {
         key: this._name,
-        intents: ['transferencia', 'pago movil', 'pm'],
+        intents: ['transferencia', 'pago movil', 'pm', 'registrar deposito'],
         action: {
             url: URL_DEPOSITAR,
             method: "POST"
@@ -56,16 +51,5 @@ export const deposit_pipe = _depositRegister.pipe(async (msg, command) => {
     })
 
     console.log({deposit})
-
-    command.action.data = buildFormData(command.form)
-
-
-
-    try {
-        assert(!msg.extra.length, loader("INVALID_DATA") + ` *${msg.extra.join(',')}*`)
-    } catch (error) {
-        command.invalid_data = [];
-    }
-
 
 })

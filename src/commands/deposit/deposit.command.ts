@@ -1,7 +1,6 @@
 import { build_form } from "../../helpers/util";
 import { loader } from "../../helpers/loader";
 import { assert, assertKeysNotNullOrUndefined } from "../../lib/assertions";
-import { buildFormData } from "../../services/form/form-data";
 import { httpClient } from "../../services/http";
 import { PATH_BANKS, URL_DEPOSITAR } from "../../shared/constants/enviroments";
 import { EXPRESSION_PATTERN } from "../../shared/constants/patterns";
@@ -99,10 +98,8 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
         assertKeysNotNullOrUndefined(command.form, ['bank_account_application', 'bank_reference', 'amount'])
         assert(banks.some(bank => bank.code === command.form.bank_account_application && bank.status === STATUS_BANK_AVAILABLE), loader("BOT_ERROR_BANK_UNAVAILABLE"))
         
-        command.invalid_data = extra.filter(e => msg.extra.includes(e))        
-        assert(!command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data.join(',')}*`)
-
-        command.action.data = buildFormData(command.form)
+        command.invalid_data = extra.filter(e => msg.extra.includes(e))       
+        
         command.call = _deposit.call
 
     }catch (e: any) {
@@ -111,8 +108,6 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
-        command.invalid_data = [];
-        command.action.data = null
     }
 })
 

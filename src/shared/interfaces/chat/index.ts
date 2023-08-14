@@ -1,6 +1,6 @@
 import z from "zod"
 import { APIResponse } from "../api/fetch-response";
-import { Message, MessageContent, MessageSendOptions } from "whatsapp-web.js";
+import { Client, Message, MessageContent, MessageSendOptions } from "whatsapp-web.js";
 import { BaseCommand } from "../commands";
 import { AxiosRequestConfig } from "axios";
 
@@ -22,6 +22,7 @@ export type Command = {
     MessageSendOptions?: MessageSendOptions; // PARA FUTURAS VALIDACIONES
     fallbacks?: any[];
     call: () => Promise<APIResponse|null>;
+    evaluate?: (posible_command: string) => boolean;
     invalid_data?: string[];
     form?: any;
     captureFunction?: any|undefined;
@@ -39,7 +40,7 @@ export type Action = {
     // return_default?: string; // DECIDE SI RETORNA EL VALOR POR DEFECTO
 }
 
-export type Callback<T> = (message: Message  & { extra: string[], phone: string }, ctx?: Command, err?: Error|unknown) => T;                                                                   
+export type Callback<T> = (message: Message  & { extra: string[], phone: string, client: Client }, ctx?: Command, err?: Error|unknown) => T;                                                                   
 
 
 export interface PipeChat {

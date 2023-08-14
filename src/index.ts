@@ -1,8 +1,7 @@
-import { balance, deposit, pay } from "./commands";
+import { activate_points, balance, deposit, pay, pin, points } from "./commands";
 import { ChatFactory } from "./lib";
 import { WhatsAppWebService } from "./lib/whatsappWebJs";
 import { EVENTS } from "./lib/whatsappWebJs/triggers";
-import { logger } from "./services/logs/winston.log";
 
 // [x] Crear loop principal
 // [x] Agregar comandos
@@ -18,24 +17,24 @@ import { logger } from "./services/logs/winston.log";
 // [ ] Agregar evaluator
 
 const mainLoop = async () => {
-    try {
-        const service = new WhatsAppWebService('Biyuyo Bot').daemon()
-        service.attachEvents(EVENTS)
+    const service = new WhatsAppWebService('Biyuyo Bot').daemon()
+    service.attachEvents(EVENTS)
 
-        // * ================================================================
-        const chat = new ChatFactory(service.bot_name, service)
-        chat
-            .addCommand(balance.command).useFunction(balance.cb)
-            .addCommand(deposit.command).useFunction(deposit.cb).useFunction(deposit.capture)
-            .addCommand(pay.command).useFunction(pay.cb).useFunction(pay.capture)
-        // * ================================================================
+    // * ================================================================
+    const chat = new ChatFactory(service.bot_name, service)
+    chat
+        .addCommand(balance.command).useFunction(balance.cb)
+        .addCommand(points.command).useFunction(points.cb)
+        .addCommand(activate_points.command).useFunction(activate_points.cb)
+    
+        .addCommand(deposit.command).useFunction(deposit.cb).useFunction(deposit.capture)
+        .addCommand(pay.command).useFunction(pay.cb).useFunction(pay.capture)
+        .addCommand(pin.command)
+    // * ================================================================
 
-        service.pipe(chat)
-        chat.listen()
-
-    } catch (error) {
-        console.log({ error })
-    }
+    chat.call('free fire', {} as any)
+    // service.pipe(chat)
+    // chat.listen()
 }
 
 mainLoop()
