@@ -107,6 +107,10 @@ export class ChatFactory<T> implements BaseChat<T> {
 
         if (keys.includes(command.key)) throw new Error(`Key: ${command.key} already exists`)
 
+        command.invalid_data = []
+        command.form = {}
+        command.action.data = {}
+
         this.commands.push(command);
         this.ctx$.next(command)
 
@@ -191,11 +195,13 @@ export class ChatFactory<T> implements BaseChat<T> {
                 status_response: STATUS_RESPONSE_FAILED,
                 react: WARNING_REACTION
             }))
+
+            command.invalid_data = []
         }
 
 
         const { message, status_response, react } = retrieve as unknown as APIResponse
-        command.invalid_data = []
+        
         command.action.data = null
         this.service.send(event.from, message, command.MessageSendOptions)
         await event.react(react || FAST_REACTION)

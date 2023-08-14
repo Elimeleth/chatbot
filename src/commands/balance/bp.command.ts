@@ -41,5 +41,4 @@ export const bp_pipe = _bp.pipe((msg, command) => {
 
     command.form = { phone: msg.phone }
     command.call = _bp.call
-    command.invalid_data = []
 })

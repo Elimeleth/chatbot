@@ -79,7 +79,4 @@ export const service_amount_pipe = _serviceAmount.pipe((msg, command) => {
             react: WARNING_REACTION
         }))
     }
-
-
-    command.invalid_data = []
 })

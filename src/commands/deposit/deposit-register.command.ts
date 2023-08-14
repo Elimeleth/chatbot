@@ -51,7 +51,7 @@ export const deposit_register_pipe = _depositRegister.pipe(async (msg, command) 
 
     command.form = deposit.payload
     command.form.type = msg.body.startsWith('transferencia') ? 'TRANSFER' : 'PM'
-    command.invalid_data = []
+    
     command.call = _depositRegister.call
 
 })

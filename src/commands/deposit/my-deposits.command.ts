@@ -43,5 +43,5 @@ export const my_deposits_pipe = _myDeposits.pipe((msg, command) => {
     command.action.url += objectToString(command.form)
 
     command.call = _myDeposits.call
-    command.invalid_data = []
+    
 })
