@@ -1,7 +1,11 @@
 import { service_code } from "../../helpers/commands";
+import { loader } from "../../helpers/loader";
 import { objectToString } from "../../helpers/util";
+import { assert } from "../../lib/assertions";
 import { httpClient } from "../../services/http";
 import { URL_MONTOS_PINES } from "../../shared/constants/enviroments";
+import { WARNING_REACTION } from "../../shared/constants/reactions";
+import { STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
 import { Service } from "../../shared/interfaces/api/services-json";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
@@ -53,10 +57,21 @@ export const pin_pipe = _pin.pipe((msg, command) => {
     const code = service_code(code => 
         code.names.includes(svc.toUpperCase()) || 
         code.names.includes(`${svc} ${rest[0]}`.toUpperCase()))?.service_code as string
-        
-    command.form = { service_code: code, phone: msg.phone }
-    const queries = objectToString(command.form)
-    command.action.url += queries
+      
+    try {  
+        assert(Boolean(code), loader("BOT_ERROR_CONSULT_SERVICE_AMOUNT_NOT_SERVICE_FOUND"))
+        command.form = { service_code: code, phone: msg.phone }
+        const queries = objectToString(command.form)
+        command.action.url += queries
+        command.call = _pin.call
+    } catch (e: any) {
+        command.call = async () => await new Promise((resolve) => resolve({
+            message: e.message.replace(/BOT:/gim, '').trim(),
+            status_response: STATUS_RESPONSE_FAILED,
+            react: WARNING_REACTION
+        }))
+    }
+
+
     command.invalid_data = []
-    command.call = _pin.call
 })

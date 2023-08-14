@@ -7,6 +7,7 @@ export type Service = {
   recharge: boolean;
   maintenance: boolean;
   pin: boolean;
+  hasTemplate: boolean;
   validate_amount: boolean;
   hasConsultFromOperator: boolean;
   hasConsutlFromAmountList: boolean;

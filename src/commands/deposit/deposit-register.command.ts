@@ -1,5 +1,4 @@
 import { loader } from "../../helpers/loader";
-import { assert,  } from "../../lib/assertions";
 import { httpClient } from "../../services/http";
 import { URL_DEPOSITAR } from "../../shared/constants/enviroments";
 import { STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
@@ -50,7 +49,8 @@ export const deposit_register_pipe = _depositRegister.pipe(async (msg, command) 
         })
     })
 
-    console.log({deposit})
+    command.form = deposit.payload
+    command.form.type = msg.body.startsWith('transferencia') ? 'TRANSFER' : 'PM'
     command.invalid_data = []
     command.call = _depositRegister.call
 

@@ -41,4 +41,7 @@ export const activateBp_pipe = _activateBp.pipe((msg, command) => {
     if (!command) return false
 
     command.form = { phone: msg.phone, type: ACTIVATE_POINTS }
+
+    command.call = _activateBp.call
+    command.invalid_data = []
 })

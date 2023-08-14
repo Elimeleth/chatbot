@@ -40,4 +40,6 @@ export const bp_pipe = _bp.pipe((msg, command) => {
     if (!command) return false
 
     command.form = { phone: msg.phone }
+    command.call = _bp.call
+    command.invalid_data = []
 })
