@@ -171,7 +171,9 @@ export class ChatFactory<T> implements BaseChat<T> {
             if (command.action.method !== 'GET' && command.form) {
                 command.action.data = buildFormData(command.form)
             }
-
+            console.log(JSON.stringify({
+                command
+            }, undefined, 1))
             // if (command?.action?.validate_value_return) value_return.parse(command.value_return)
 
             // @ts-ignore
@@ -182,7 +184,7 @@ export class ChatFactory<T> implements BaseChat<T> {
             console.log({ retrieve })
         } catch (e: any) {
             retrieve = await new Promise((resolve) => resolve({
-                message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("HOW_DEPOSIT"),
+                message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("BOT_ERROR_FLOW"),
                 status_response: STATUS_RESPONSE_FAILED,
                 react: WARNING_REACTION
             }))

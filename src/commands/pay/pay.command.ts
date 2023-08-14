@@ -20,6 +20,11 @@ class Pay extends BaseCommand {
             url: URL_PAGAR,
             method: "POST",
         },
+        evaluate: (posible_command) => {
+            if (service_code(code => !!(posible_command.match(new RegExp(code.code, 'gm')))))
+                return true
+            return false
+        },
         call: async () => await new Promise((resolve, reject) => resolve(null))
     }
     call = async () => await httpClient(this.command.action)
@@ -110,6 +115,9 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         command.call = _pay.call
 
     } catch (e: any) {
+        console.log({
+            e
+        })
         const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*`}]).replace(/BOT:/gim, '').trim()
         command.call = async () => await new Promise((resolve) => resolve({
             message,
