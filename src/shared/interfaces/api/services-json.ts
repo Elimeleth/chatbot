@@ -7,7 +7,7 @@ export type Service = {
   maintenance: boolean;
   pin: boolean;
   validate_amount: boolean;
-  hasConsultOperator: boolean;
-  hasConsultAmount: boolean;
+  hasConsultFromOperator: boolean;
+  hasConsutlFromAmountList: boolean;
   especial_amount: any[];
 };

@@ -12,9 +12,7 @@ const loadYaml = (key: string, filename: string) => {
 const loadJson = (filename: string) => {
   try {
     const json_data = fs.readFileSync(filename, 'utf8');
-    console.log({
-      json_data
-    })
+    
     return load(json_data) as any
     
   } catch (error) {

@@ -2,7 +2,7 @@ import { BehaviorSubject } from "rxjs";
 import { Action, BaseChat, BaseChatService, Callback, Command, value_return } from "../shared/interfaces/chat";
 import { assert, assertArray } from "./assertions";
 import { BaseCommand } from "../shared/interfaces/commands";
-import { Message } from "whatsapp-web.js";
+import { Client, Message } from "whatsapp-web.js";
 import { APIResponse, STATUS_RESPONSE_FAILED } from "../shared/interfaces/api/fetch-response";
 import { clean } from "../helpers/util";
 import { FAST_REACTION, WAITING_REACTION, WARNING_REACTION } from "../shared/constants/reactions";
@@ -44,7 +44,6 @@ export class ChatFactory<T> implements BaseChat<T> {
             (c.key === possible_command+rest[0] || c.intents.includes(possible_command+rest[0]))
         )
 
-        console.log({command})
         if (!command) throw new Error(`Key: (${possible_command}) not found`)
 
         command.user_extra_intent = keyOrIntent.replace(possible_command, '').trim()
@@ -139,16 +138,17 @@ export class ChatFactory<T> implements BaseChat<T> {
         return this
     }
 
-    async call(input: string, event: Message) {
-        // await event.react(WAITING_REACTION)
+    async call(input: string, event: Message & { extra: string[], phone: string, client: Client }) {
+        await event.react(WAITING_REACTION)
         const { command, intent } = this.searchIntentOrFail(clean(input)) as { command: Command, intent: RegExpMatchArray | null }
 
-        // @ts-ignore
-        event.extra = event.body.replace(new RegExp(intent[0], 'gim'), '').trim().split(' ').filter((word) => Boolean(word))
-        // @ts-ignore
+        event.extra = event.body && intent ? 
+            event.body.replace(new RegExp(intent[0], 'gim'), '').trim().split(' ').filter((word) => Boolean(word)) :
+            []
+            
         event.phone = event.from.split("@")[0]
-        // @ts-ignore
-        event.client = this.service._client
+        
+        // event.client = this.service.client
         
         command.fallbacks?.map(async fallback => {
             try {
@@ -158,17 +158,23 @@ export class ChatFactory<T> implements BaseChat<T> {
             }
         })
 
+
         if (command.action.method !== 'GET') {
             command.action.data = buildFormData(command.form)
         }
+        console.log({
+            command
+        })
+
         // if (command?.action?.validate_value_return) value_return.parse(command.value_return)
         let retrieve: APIResponse|null = null
 
         try {      
             // @ts-ignore
             assert(!command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data.join(',')}*`)
-            console.log({ command })
+            
             retrieve = await command.call()
+            console.log({retrieve})
         }catch (e: any) {
             retrieve = await new Promise((resolve) => resolve({
                 message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("HOW_DEPOSIT"),
@@ -180,7 +186,6 @@ export class ChatFactory<T> implements BaseChat<T> {
         assert(!!(retrieve?.message), "Response must dont be empty")
 
         const { message, status_response, react } = retrieve as unknown as APIResponse
-        console.log({message, status_response, react})
         command.invalid_data = []
         command.action.data = null
         this.service.send(event.from, message, command.MessageSendOptions)

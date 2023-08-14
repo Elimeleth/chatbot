@@ -29,12 +29,11 @@ const mainLoop = async () => {
     
         .addCommand(deposit.command).useFunction(deposit.cb).useFunction(deposit.capture)
         .addCommand(pay.command).useFunction(pay.cb).useFunction(pay.capture)
-        .addCommand(pin.command)
+        .addCommand(pin.command).useFunction(pin.cb)
     // * ================================================================
 
-    chat.call('free fire', {} as any)
-    // service.pipe(chat)
-    // chat.listen()
+    service.pipe(chat)
+    chat.listen()
 }
 
 mainLoop()

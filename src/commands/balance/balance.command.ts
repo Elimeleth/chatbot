@@ -95,7 +95,7 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
             assertKeysNotNullOrUndefined(command.form, ['service_code', 'gift_code'], true)
             assert(!command.form.gift_code && findKeyOrFail(command.form, ['service_code', 'contract_number']), loader("BOT_ERROR_NOT_SERVICE_OR_CONTRACT"))
             assert(service.recharge && !command.form.contract_number.match(new RegExp(service.code, 'gim')), loader("BOT_ERROR_MOVIL_NOT_MATCH"))
-            assert(command.form.service_code && service.hasConsultOperator)
+            assert(command.form.service_code && service.hasConsultFromOperator)
 
             command.invalid_data = extra.filter(e => msg.extra.includes(e))        
         }
