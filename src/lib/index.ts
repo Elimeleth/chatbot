@@ -171,18 +171,21 @@ export class ChatFactory<T> implements BaseChat<T> {
             if (command.action.method !== 'GET' && command.form) {
                 command.action.data = buildFormData(command.form)
             }
-            console.log(JSON.stringify({
+            console.log({
                 command
-            }, undefined, 1))
+            })
             // if (command?.action?.validate_value_return) value_return.parse(command.value_return)
 
             // @ts-ignore
-            assert(!command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data.join(',')}*`)
+            assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
 
             retrieve = await command.call()
             assert(!!(retrieve?.message), "Response must dont be empty")
             console.log({ retrieve })
         } catch (e: any) {
+            console.log({
+                e
+            })
             retrieve = await new Promise((resolve) => resolve({
                 message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("BOT_ERROR_FLOW"),
                 status_response: STATUS_RESPONSE_FAILED,
