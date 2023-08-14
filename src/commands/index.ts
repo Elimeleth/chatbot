@@ -8,7 +8,9 @@ import { _pay, pay_capture, pay_pipe } from "./pay/pay.command"
 import { _pin, pin_pipe } from "./pines/pines.command"
 import { _serviceAmount, service_amount_pipe } from "./services/amount.command"
 import { _myPayments, my_payments_pipe } from "./pay/my-payments.command"
+import { _welcome } from "./interact/welcome.command"
 
+export const welcome = { command: _welcome }
 export const service_amounts = { command: _serviceAmount, cb: service_amount_pipe }
 export const balance = { command: _balance, cb: balance_pipe, capture: null }
 export const points = { command: _bp, cb: bp_pipe }
