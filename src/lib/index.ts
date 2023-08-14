@@ -37,11 +37,13 @@ export class ChatFactory<T> implements BaseChat<T> {
     private findKeyOrFail(keyOrIntent: string, return_intent = false) {
         const command_regexp = (intents: string[]) => new RegExp(`${(intents.map(i => i.trim()).join('|'))}`, 'gim')
         const [possible_command, ...rest] = Array.isArray(keyOrIntent) ? keyOrIntent : keyOrIntent.split(' ')
+        const command_double = `${possible_command} ${rest[0]}`
+        const command_triple = `${possible_command} ${rest[0]} ${rest[1]}`
 
         const command = this.commands.find(c =>
             (c.evaluate && c.evaluate(keyOrIntent)) ||
-            (c.key === possible_command || c.intents.includes(possible_command)) ||
-            (c.key === possible_command + rest[0] || c.intents.includes(possible_command + rest[0]))
+            ([command_triple, command_double, possible_command].includes(c.key) || 
+            c.intents.some(key => [command_triple, command_double, possible_command].includes(key)))
         )
 
         if (!command) throw new Error(`Key: (${possible_command}) not found`)
@@ -70,7 +72,7 @@ export class ChatFactory<T> implements BaseChat<T> {
 
     }
 
-    private searchIntentOrFail(input: string, expression_regexp: 'only-letters' | 'only-numbers' | 'letters-numbers' | undefined = undefined) {
+    private async searchIntentOrFail(input: string, expression_regexp: 'only-letters' | 'only-numbers' | 'letters-numbers' | undefined = undefined) {
         if (expression_regexp) {
             const expr = this.validateExpression(expression_regexp)
             input = input.replace(expr, '')
@@ -140,8 +142,13 @@ export class ChatFactory<T> implements BaseChat<T> {
 
     async call(input: string, event: Message & { extra: string[], phone: string, client: Client }) {
         await event.react(WAITING_REACTION)
-        const { command, intent } = this.searchIntentOrFail(clean(input)) as { command: Command, intent: RegExpMatchArray | null }
+        const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(e => {
+            console.log(e)
+            return { command: null, intent: null }
+        }) as { command: Command, intent: RegExpMatchArray | null }
 
+        if (!command) return
+        
         event.extra = event.body && intent ?
             event.body.replace(new RegExp(intent[0], 'gim'), '').trim().split(' ').filter((word) => Boolean(word)) :
             []

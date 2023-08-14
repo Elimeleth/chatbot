@@ -3,9 +3,10 @@ import { loader } from "../../helpers/loader";
 import { objectToString } from "../../helpers/util";
 import { assert } from "../../lib/assertions";
 import { httpClient } from "../../services/http";
-import { URL_MONTOS_PINES } from "../../shared/constants/enviroments";
-import { WARNING_REACTION } from "../../shared/constants/reactions";
-import { STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
+import { PATH_FILE_SERVICES_AMOUNTS, URL_MONTOS_PINES } from "../../shared/constants/enviroments";
+import { INFO_REACTION, WARNING_REACTION } from "../../shared/constants/reactions";
+import { STATUS_RESPONSE_FAILED, STATUS_RESPONSE_SUCCES } from "../../shared/interfaces/api/fetch-response";
+import { Amount } from "../../shared/interfaces/api/services-amounts";
 import { Service } from "../../shared/interfaces/api/services-json";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
@@ -55,16 +56,22 @@ export const service_amount_pipe = _serviceAmount.pipe((msg, command) => {
     if (!command) return false
     
     const [svc, ...rest] = msg.body.split(' ')
+    const amounts = loader(null, PATH_FILE_SERVICES_AMOUNTS) as Amount[]
+
     const code = service_code(code => 
         code.names.includes(svc.toUpperCase()) || 
-        code.names.includes(`${svc} ${rest[0]}`.toUpperCase()))?.service_code as string
+        code.names.includes(`${svc} ${rest[0]}`.toUpperCase()) && code.hasTemplate) as Service
+
+    const message_amount = amounts.find(amount => amount.code === code.code)?.message
         
     try {
         assert(Boolean(code), loader("BOT_ERROR_CONSULT_SERVICE_AMOUNT_NOT_SERVICE_FOUND"))
-        command.form = { service_code: code, phone: msg.phone }
-        const queries = objectToString(command.form)
-        command.action.url += queries
-        command.call = _serviceAmount.call
+               
+        command.call = async () => await new Promise((resolve) => resolve({
+            message: loader(code.names[0])+`\n\n${message_amount}`,
+            status_response: STATUS_RESPONSE_SUCCES,
+            react: INFO_REACTION
+        }))
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
             message: e.message.replace(/BOT:/gim, '').trim(),

@@ -13,7 +13,7 @@ import { BaseCommand } from "../../shared/interfaces/commands";
 class Pins extends BaseCommand {
     private command: Command = {
         key: "pin",
-        intents: ['pin'],
+        intents: ['pin', 'pines'],
         evaluate: (posible_command) => {
             const [command, ...rest] = posible_command.split(' ');
             const command_long = command+rest[0]
@@ -36,7 +36,6 @@ class Pins extends BaseCommand {
     constructor (name: string) {
         super(name)
     }
-
     
     pipe<T>(cb: Callback<T>) {
         return cb
@@ -56,10 +55,10 @@ export const pin_pipe = _pin.pipe((msg, command) => {
     const [svc, ...rest] = msg.body.split(' ')
     const code = service_code(code => 
         code.names.includes(svc.toUpperCase()) || 
-        code.names.includes(`${svc} ${rest[0]}`.toUpperCase()))?.service_code as string
+        code.names.includes(`${svc} ${rest[0]}`.toUpperCase()) && code.hasConsutlFromAmountList)?.service_code as string
       
     try {  
-        assert(Boolean(code), loader("BOT_ERROR_CONSULT_SERVICE_AMOUNT_NOT_SERVICE_FOUND"))
+        assert(Boolean(code), loader("BOT_ERROR_CONSULT_PIN_AMOUNT_NOT_PIN_FOUND"))
         command.form = { service_code: code, phone: msg.phone }
         const queries = objectToString(command.form)
         command.action.url += queries

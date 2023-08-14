@@ -1,4 +1,5 @@
 export const WAITING_REACTION = '⏱️'
 export const FAST_REACTION = '⚡'
+export const INFO_REACTION = 'ℹ️'
 export const WARNING_REACTION = '❕'
 export const ERROR_INVALID_DATA_REACTION = '❗️'
