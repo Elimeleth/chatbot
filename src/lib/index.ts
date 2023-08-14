@@ -38,10 +38,10 @@ export class ChatFactory<T> implements BaseChat<T> {
         const command_regexp = (intents: string[]) => new RegExp(`${(intents.map(i => i.trim()).join('|'))}`, 'gim')
         const [possible_command, ...rest] = Array.isArray(keyOrIntent) ? keyOrIntent : keyOrIntent.split(' ')
 
-        const command = this.commands.find(c => 
+        const command = this.commands.find(c =>
             (c.evaluate && c.evaluate(keyOrIntent)) ||
             (c.key === possible_command || c.intents.includes(possible_command)) ||
-            (c.key === possible_command+rest[0] || c.intents.includes(possible_command+rest[0]))
+            (c.key === possible_command + rest[0] || c.intents.includes(possible_command + rest[0]))
         )
 
         if (!command) throw new Error(`Key: (${possible_command}) not found`)
@@ -142,14 +142,14 @@ export class ChatFactory<T> implements BaseChat<T> {
         await event.react(WAITING_REACTION)
         const { command, intent } = this.searchIntentOrFail(clean(input)) as { command: Command, intent: RegExpMatchArray | null }
 
-        event.extra = event.body && intent ? 
+        event.extra = event.body && intent ?
             event.body.replace(new RegExp(intent[0], 'gim'), '').trim().split(' ').filter((word) => Boolean(word)) :
             []
-            
+
         event.phone = event.from.split("@")[0]
-        
+
         // event.client = this.service.client
-        
+
         command.fallbacks?.map(async fallback => {
             try {
                 await fallback(event, command)
@@ -157,33 +157,30 @@ export class ChatFactory<T> implements BaseChat<T> {
                 await fallback(null, null, new Error(e.message))
             }
         })
+        let retrieve: APIResponse | null = null
 
+        try {
 
-        if (command.action.method !== 'GET') {
-            command.action.data = buildFormData(command.form)
-        }
-        console.log({
-            command
-        })
+            if (command.action.method !== 'GET' && command.form) {
+                command.action.data = buildFormData(command.form)
+            }
 
-        // if (command?.action?.validate_value_return) value_return.parse(command.value_return)
-        let retrieve: APIResponse|null = null
+            // if (command?.action?.validate_value_return) value_return.parse(command.value_return)
 
-        try {      
             // @ts-ignore
             assert(!command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data.join(',')}*`)
-            
+
             retrieve = await command.call()
-            console.log({retrieve})
-        }catch (e: any) {
+            assert(!!(retrieve?.message), "Response must dont be empty")
+            console.log({ retrieve })
+        } catch (e: any) {
             retrieve = await new Promise((resolve) => resolve({
                 message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("HOW_DEPOSIT"),
                 status_response: STATUS_RESPONSE_FAILED,
                 react: WARNING_REACTION
             }))
         }
-        
-        assert(!!(retrieve?.message), "Response must dont be empty")
+
 
         const { message, status_response, react } = retrieve as unknown as APIResponse
         command.invalid_data = []

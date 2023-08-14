@@ -61,9 +61,9 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
 
             const services_codes = (values: string[]) => {
                 for (const value of values) {
-                    if (services.some(service => service.name === value.toUpperCase())) {
+                    if (services.some(service => service.names.includes(value.toUpperCase()))) {
                         msg.extra = msg.extra.filter(e => e !== value)
-                        return services.find(code => code.name === value.toUpperCase())?.service_code as string
+                        return services.find(code => code.names.includes(value.toUpperCase()))?.service_code as string
                     }
                 }
 

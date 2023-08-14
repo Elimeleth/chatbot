@@ -1,5 +1,6 @@
 export type Service = {
   name: string;
+  names: string[];
   service_code: string;
   service: string;
   code: string;

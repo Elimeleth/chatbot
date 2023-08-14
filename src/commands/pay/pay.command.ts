@@ -59,9 +59,9 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
     const services_codes = (values: string[]) => {
         let service = values.join(' ').match(EXPRESSION_PATTERN.SERVICE_CODE)?.toString() as string
         service = service ? service.trim() : service
-        if (service && services.some(code => code.name === service.toUpperCase())) {
+        if (service && services.some(code => code.names.includes(service.toUpperCase()))) {
             msg.extra = msg.extra.filter(e => !service.split(' ').includes(e))
-            return services.find(code => code.name === service.toUpperCase())?.service_code as string
+            return services.find(code => code.names.includes(service.toUpperCase()))?.service_code as string
         }
 
         return ''
@@ -92,7 +92,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         let service: Service | null = null
 
         if (command.form.service_code) {
-            service = service_code((code: Service) => code.name === command.form.service_code || code.service_code === command.form.service_code)
+            service = service_code((code: Service) => code.names.includes(command.form.service_code) || code.service_code === command.form.service_code)
         } else if (command.form.contract_number && !!(command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE))) {
             service = service_code((code: Service) => !!(
                 code.recharge &&
