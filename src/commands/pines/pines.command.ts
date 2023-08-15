@@ -70,7 +70,4 @@ export const pin_pipe = _pin.pipe((msg, command) => {
             react: WARNING_REACTION
         }))
     }
-
-
-    command.invalid_data = []
 })
