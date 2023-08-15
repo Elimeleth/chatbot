@@ -105,19 +105,16 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
             ))
         }
         command.form.service_code = service?.service_code
-
+        
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
-        assert(command.form.service_code && command.form.amount)
-        assert(command.form.contract_number && !service?.recharge && !(command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
+        assert(command.form.service_code && command.form.amount && service?.pin, loader("HOW_PAYMENT"))
+        assert(command.form.contract_number || !!(service?.recharge && !command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
 
         command.invalid_data = extra.filter(e => msg.extra.includes(e))
        
         command.call = _pay.call
 
     } catch (e: any) {
-        console.log({
-            e
-        })
         const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*`}]).replace(/BOT:/gim, '').trim()
         command.call = async () => await new Promise((resolve) => resolve({
             message,
@@ -129,6 +126,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
 
 export const pay_capture = _pay.pipe((_, command) => {
     if (!command) return false
+    
     const amounts = loader(null, PATH_FILE_SERVICES_AMOUNTS) as Amount[]
     const amount_list = amounts.find(amount => amount.code === command.form.service_code) as Amount
     const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service

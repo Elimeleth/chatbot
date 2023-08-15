@@ -22,6 +22,7 @@ export type Command = {
     evaluate?: (posible_command: string) => boolean;
     invalid_data?: string[];
     form?: any;
+    captureCommand?: string|null;
     captureFunction?: any|undefined;
     return_direct?: boolean; // DECIDE SI RETORNA DIRECTO UNA VEZ ENCUENTRE EL COMANDO
     api_response?: Partial<z.infer<typeof api_response>>; // VALIDA EL VALOR QUE RETORNA DE ACUERDO A SU TIPO DE DATO

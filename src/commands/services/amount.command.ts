@@ -62,13 +62,14 @@ export const service_amount_pipe = _serviceAmount.pipe((msg, command) => {
         code.names.includes(svc.toUpperCase()) || 
         code.names.includes(`${svc} ${rest[0]}`.toUpperCase()) && code.hasTemplate) as Service
 
-    const message_amount = amounts.find(amount => amount.code === code.code)?.message
-        
+    let message_amount = amounts.find(amount => amount.code === code.service_code)?.message
+    
+    message_amount = message_amount ? `\n\n*${message_amount}*` : ''
     try {
         assert(Boolean(code), loader("BOT_ERROR_CONSULT_SERVICE_AMOUNT_NOT_SERVICE_FOUND"))
                
         command.call = async () => await new Promise((resolve) => resolve({
-            message: loader(code.names[0])+`\n\n${message_amount}`,
+            message: loader(code.names[0])+message_amount,
             status_response: STATUS_RESPONSE_SUCCES,
             react: INFO_REACTION
         }))

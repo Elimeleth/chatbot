@@ -151,13 +151,13 @@ export class ChatFactory<T> implements BaseChat<T> {
             console.log(e)
             return { command: null, intent: null }
         }) as { command: Command, intent: RegExpMatchArray | null }
-
-        if (!command) return
         
-        event.extra = event.body && intent ?
-            event.body.replace(new RegExp(intent[0], 'gim'), '').trim().split(' ').filter((word) => Boolean(word)) :
-            []
-
+        if (!command) return
+        const extra = intent ? intent[0] : ''
+        command.captureCommand = extra
+        
+        event.extra = event.body.replace(new RegExp(extra, 'gim'), '').trim().split(' ').filter((word) => Boolean(word))
+        
         event.phone = event.from.split("@")[0]
 
         // event.client = this.service.client
@@ -176,9 +176,6 @@ export class ChatFactory<T> implements BaseChat<T> {
             if (command.action.method !== 'GET' && command.form) {
                 command.action.data = buildFormData(command.form)
             }
-            console.log({
-                command
-            })
 
             // @ts-ignore
             assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
