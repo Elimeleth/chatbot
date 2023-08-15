@@ -36,8 +36,8 @@ class AfiliateActivate extends BaseCommand {
     }
 }
 
-export const _referred = new AfiliateActivate('activar')
-export const referred_pipe = _referred.pipe((msg, command) => {
+export const _activate_afiliate = new AfiliateActivate('activar')
+export const activate_afiliate_pipe = _activate_afiliate.pipe((msg, command) => {
     if (!command) return false
 
     const { extra, form } = build_form(
@@ -55,5 +55,5 @@ export const referred_pipe = _referred.pipe((msg, command) => {
 
     command.invalid_data = extra
     
-    command.call = _referred.call
+    command.call = _activate_afiliate.call
 })

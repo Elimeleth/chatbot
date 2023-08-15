@@ -16,7 +16,11 @@ import { _banks } from "./banks/banks.command"
 import { _socios, socios_pipe } from "./socios/socios.command"
 import { _activate_socios, activate_socios_pipe } from "./socios/socios-activate.command"
 import { _referred, referred_pipe } from "./interact/referred.command"
+import { _afiliate, afiliate_pipe } from "./afiliate/afiliate.command"
+import { _activate_afiliate, activate_afiliate_pipe } from "./afiliate/activate.command"
 
+export const afiliate = { command: _afiliate, cb: afiliate_pipe }
+export const activate_afiliate = { command: _activate_afiliate, cb: activate_afiliate_pipe }
 export const welcome = { command: _welcome }
 export const commands = { command: _tutorial }
 export const extra_commands = { command: _extra_tutorial }

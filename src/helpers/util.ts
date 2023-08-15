@@ -1,3 +1,5 @@
+import { loader } from "./loader";
+
 export const findKeyOrFail = (obj: any, keys: string[]) => {
     for (const key of keys) {
         if (obj[key] == null) {
@@ -66,6 +68,7 @@ const chars: any = {
 };
 
 export const parse_message_output = (message_to_parse: string, parses: { key: string; value: string;}[]) => {
+  if (message_to_parse.startsWith('BOT:')) return loader("BOT_ERROR_FLOW")
   for (const parse of parses) {
     message_to_parse = message_to_parse.replace(parse.key, parse.value)
   }

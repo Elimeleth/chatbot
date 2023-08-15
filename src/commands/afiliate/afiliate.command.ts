@@ -5,7 +5,7 @@ import { EXPRESSION_PATTERN } from "../../shared/constants/patterns";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
 
-class AfiliateActivate extends BaseCommand {
+class Afiliate extends BaseCommand {
     private command: Command = {
         key: "afiliarme",
         intents: ['afiliar', 'registrarme', 'registrame', 'afiliarme'],
@@ -36,8 +36,8 @@ class AfiliateActivate extends BaseCommand {
     }
 }
 
-export const _referred = new AfiliateActivate('activar')
-export const referred_pipe = _referred.pipe((msg, command) => {
+export const _afiliate = new Afiliate('afiliarme')
+export const afiliate_pipe = _afiliate.pipe((msg, command) => {
     if (!command) return false
 
     const { extra, form } = build_form(
@@ -64,7 +64,6 @@ export const referred_pipe = _referred.pipe((msg, command) => {
 
     if (!command.form.name || command.form.name.length > 6) delete 
     command.form.name;
-    command.invalid_data = extra
     
-    command.call = _referred.call
+    command.call = _afiliate.call
 })
