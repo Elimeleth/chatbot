@@ -85,6 +85,10 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
                 condition: (param) => !!(param.match(EXPRESSION_PATTERN.NUMBER_CONTRACT) && param.length >= 4)
             },
             {
+                name: 'gif_code',
+                condition: (param) => !!(param.match(EXPRESSION_PATTERN.GIFT_CODE))
+            },
+            {
                 name: 'amount',
                 condition: (param) => !!(param.match(EXPRESSION_PATTERN.SERVICE_AMOUNT))
             },
@@ -106,7 +110,11 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         }
         
         command.form.service_code = service?.service_code
-        
+        console.log({
+            command,
+            form: command.form
+        })
+        assert(command.captureCommand === 'raspar' && command.form.gif_code, loader("HOW_SCRAPE"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
         // assert(command.form.service_code && !!(!command.form.amount && !service?.pin), loader("HOW_PAYMENT"))
         assert(command.form.contract_number || !!(service?.recharge && !command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
@@ -114,7 +122,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         command.invalid_data = extra.filter(e => msg.extra.includes(e))
         
         command.call = _pay.call
-
+        command.error_message = ''
     } catch (e: any) {
         const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*`}]).replace(/BOT:/gim, '').trim()
         command.call = async () => await new Promise((resolve) => resolve({
@@ -122,6 +130,8 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
+
+        command.error_message = message
     }
 })
 
@@ -133,11 +143,12 @@ export const pay_capture = _pay.pipe((_, command) => {
     const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service
 
     try {
+        assert(!command.error_message, command.error_message)
         if (service.validate_amount && amount_list && command.form.amount) {
 
             const { max, min, multiple } = amount_list.amounts
             const amount_service = command.form.amount.replace(/,/gm, '.')
-
+            
             assert((Number(amount_service) > Number(min)), loader("BOT_ERROR_PAYMENT_MIN_AMOUNT"))
             assert((Number(amount_service) < Number(max)), loader("BOT_ERROR_PAYMENT_MAX_AMOUNT"))
             assert((Number(amount_service) % Number(multiple) === 0), loader("BOT_ERROR_PAYMENT_MULTIPLE_AMOUNT"))
@@ -162,7 +173,7 @@ export const pay_capture = _pay.pipe((_, command) => {
 
         command.call = async () => await new Promise((resolve, _) => {
             resolve({
-                message,
+                message: command.error_message || message,
                 status_response: STATUS_RESPONSE_FAILED,
                 react: ERROR_INVALID_DATA_REACTION
             })
