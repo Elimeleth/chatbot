@@ -1,4 +1,4 @@
-import { activate_points, balance, deposit, deposit_register, my_deposits, my_payments, pay, pin, points, service_amounts, welcome } from "./commands";
+import { activate_points, balance, banks, commands, deposit, deposit_register, extra_commands, my_deposits, my_payments, pay, pin, points, service_amounts, services, welcome } from "./commands";
 import { ChatFactory } from "./lib";
 import { WhatsAppWebService } from "./lib/whatsappWebJs";
 import { EVENTS } from "./lib/whatsappWebJs/triggers";
@@ -24,6 +24,10 @@ const mainLoop = async () => {
     const chat = new ChatFactory(service.bot_name, service)
     chat
         .addCommand(welcome.command)
+        .addCommand(commands.command)
+        .addCommand(extra_commands.command)
+        .addCommand(services.command)
+        .addCommand(banks.command)
         .addCommand(service_amounts.command).useFunction(service_amounts.cb)
         .addCommand(balance.command).useFunction(balance.cb)
         .addCommand(points.command).useFunction(points.cb)

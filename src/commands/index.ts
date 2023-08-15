@@ -9,8 +9,16 @@ import { _pin, pin_pipe } from "./pines/pines.command"
 import { _serviceAmount, service_amount_pipe } from "./services/amount.command"
 import { _myPayments, my_payments_pipe } from "./pay/my-payments.command"
 import { _welcome } from "./interact/welcome.command"
+import { _tutorial } from "./interact/tutorial.command"
+import { _extra_tutorial } from "./interact/extra-commands.command"
+import { _services } from "./interact/services.command"
+import { _banks } from "./banks/banks.command"
 
 export const welcome = { command: _welcome }
+export const commands = { command: _tutorial }
+export const extra_commands = { command: _extra_tutorial }
+export const services = { command: _services }
+export const banks = { command: _banks }
 export const service_amounts = { command: _serviceAmount, cb: service_amount_pipe }
 export const balance = { command: _balance, cb: balance_pipe, capture: null }
 export const points = { command: _bp, cb: bp_pipe }

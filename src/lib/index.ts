@@ -193,11 +193,12 @@ export class ChatFactory<T> implements BaseChat<T> {
             }))
         }
 
-
+        command.MessageSendOptions ||= {}
         const { message, status_response, react } = retrieve as unknown as APIResponse
         command.invalid_data = []
         command.action.data = null
         this.service.send(event.from, message, command.MessageSendOptions)
+
         await event.react(react || FAST_REACTION)
     }
 
