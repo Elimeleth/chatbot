@@ -1,15 +1,14 @@
 import { objectToString } from "../../helpers/util";
 import { httpClient } from "../../services/http";
-import { ACTIVATE_SOCIOS, INFO_SOCIOS } from "../../shared/constants/api";
+import { ACTIVATE_SOCIOS } from "../../shared/constants/api";
 import { URL_SOCIOS } from "../../shared/constants/enviroments";
-import { APIResponse } from "../../shared/interfaces/api/fetch-response";
 import { Callback, Command } from "../../shared/interfaces/chat";
 import { BaseCommand } from "../../shared/interfaces/commands";
 
-export class Socios extends BaseCommand {
+export class SociosActivate extends BaseCommand {
     private command: Command = {
-        key: "socios",
-        intents: ['socio +','socio plus','socio', 'socios', 'biyuyo socios', 'biyuyo socio', 'membresia'],
+        key: "activar socios",
+        intents: ['activar socios','activar socio', 'activar biyuyo socio', 'activar biyuyo socios', 'activar sociedad', 'activar plus', 'activar membresia', 'activar biyuyo'],
         action: {
             url: URL_SOCIOS,
             method: "GET",
@@ -34,11 +33,11 @@ export class Socios extends BaseCommand {
         }
     }
 }
-export const _socios = new Socios('socios');
-export const socios_pipe = _socios.pipe((msg, command) => {
+export const _activate_socios = new SociosActivate('activar socios');
+export const activate_socios_pipe = _activate_socios.pipe((msg, command) => {
     if (!command) return false
 
-    command.form = { phone: msg.phone, type: INFO_SOCIOS }
+    command.form = { phone: msg.phone, type: ACTIVATE_SOCIOS }
     command.action.url += objectToString(command.form)
-    command.call = _socios.call
+    command.call = _activate_socios.call
 })

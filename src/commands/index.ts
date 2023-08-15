@@ -13,12 +13,18 @@ import { _tutorial } from "./interact/tutorial.command"
 import { _extra_tutorial } from "./interact/extra-commands.command"
 import { _services } from "./interact/services.command"
 import { _banks } from "./banks/banks.command"
+import { _socios, socios_pipe } from "./socios/socios.command"
+import { _activate_socios, activate_socios_pipe } from "./socios/socios-activate.command"
+import { _referred, referred_pipe } from "./interact/referred.command"
 
 export const welcome = { command: _welcome }
 export const commands = { command: _tutorial }
 export const extra_commands = { command: _extra_tutorial }
+export const referred = { command: _referred, cb: referred_pipe }
 export const services = { command: _services }
 export const banks = { command: _banks }
+export const socios = { command: _socios, cb: socios_pipe }
+export const activate_socios = { command: _activate_socios, cb: activate_socios_pipe }
 export const service_amounts = { command: _serviceAmount, cb: service_amount_pipe }
 export const balance = { command: _balance, cb: balance_pipe, capture: null }
 export const points = { command: _bp, cb: bp_pipe }

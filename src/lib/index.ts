@@ -183,8 +183,8 @@ export class ChatFactory<T> implements BaseChat<T> {
             // @ts-ignore
             assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
 
-            retrieve = await command.call() as unknown as APIResponse | APIResponse[]
-            assert(!Array.isArray(retrieve) && !!(retrieve?.message), loader("BOT_ERROR_FLOW"))
+            retrieve = await command.call() as unknown as APIResponse
+            assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
             console.log({ retrieve })
         } catch (e: any) {
             retrieve = await new Promise((resolve) => resolve({
@@ -198,24 +198,13 @@ export class ChatFactory<T> implements BaseChat<T> {
 
         command.MessageSendOptions ||= {}
         command.action.data = null
-        command.MessageSendOptions.quotedMessageId = event.id.id
-        
-        if (Array.isArray(retrieve)) {
-            for (const ret in retrieve) {
-                const { message, react } = ret as unknown as APIResponse
-                command.MessageSendOptions.linkPreview = !!(message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
-                this.service.send(event.from, message, command.MessageSendOptions)
-        
-                await event.react(react || FAST_REACTION)
-            }
-        }else {
-            const { message, react } = retrieve as APIResponse
-            command.MessageSendOptions.linkPreview = !!(message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
-            this.service.send(event.from, message, command.MessageSendOptions)
+        // command.MessageSendOptions.quotedMessageId = event.id.id
 
-            await event.react(react || FAST_REACTION)
-        }
+        const { message, react } = retrieve as unknown as APIResponse
+        command.MessageSendOptions.linkPreview = !!(message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
+        this.service.send(event.from, message, command.MessageSendOptions)
 
+        await event.react(react || FAST_REACTION)
     }
 
 }

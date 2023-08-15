@@ -1,4 +1,4 @@
-import { activate_points, balance, banks, commands, deposit, deposit_register, extra_commands, my_deposits, my_payments, pay, pin, points, service_amounts, services, welcome } from "./commands";
+import { activate_points, activate_socios, balance, banks, commands, deposit, deposit_register, extra_commands, my_deposits, my_payments, pay, pin, points, referred, service_amounts, services, socios, welcome } from "./commands";
 import { ChatFactory } from "./lib";
 import { WhatsAppWebService } from "./lib/whatsappWebJs";
 import { EVENTS } from "./lib/whatsappWebJs/triggers";
@@ -28,6 +28,9 @@ const mainLoop = async () => {
         .addCommand(extra_commands.command)
         .addCommand(services.command)
         .addCommand(banks.command)
+        .addCommand(referred.command).useFunction(referred.cb)
+        .addCommand(socios.command).useFunction(socios.cb)
+        .addCommand(activate_socios.command).useFunction(activate_socios.cb)
         .addCommand(service_amounts.command).useFunction(service_amounts.cb)
         .addCommand(balance.command).useFunction(balance.cb)
         .addCommand(points.command).useFunction(points.cb)

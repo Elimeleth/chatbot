@@ -107,6 +107,7 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
             : command.action.url += queries
 
         command.form = null
+        
         command.call = _balance.call
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
