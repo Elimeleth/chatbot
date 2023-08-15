@@ -62,7 +62,8 @@ export const referred_pipe = _referred.pipe((msg, command) => {
 		command.form.name = null
 	}
 
-    if (!command.form.name || command.form.name.length > 6) delete command.form.name;
+    if (!command.form.name || command.form.name.length > 6) delete 
+    command.form.name;
     command.invalid_data = extra
     
     command.call = _referred.call
