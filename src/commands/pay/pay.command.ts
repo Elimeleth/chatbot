@@ -104,14 +104,15 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
                 command.form.contract_number.match(new RegExp(code.code, 'gim'))
             ))
         }
+        
         command.form.service_code = service?.service_code
         
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
-        assert(command.form.service_code && command.form.amount && service?.pin, loader("HOW_PAYMENT"))
+        // assert(command.form.service_code && !!(!command.form.amount && !service?.pin), loader("HOW_PAYMENT"))
         assert(command.form.contract_number || !!(service?.recharge && !command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
 
         command.invalid_data = extra.filter(e => msg.extra.includes(e))
-       
+        
         command.call = _pay.call
 
     } catch (e: any) {
@@ -132,7 +133,7 @@ export const pay_capture = _pay.pipe((_, command) => {
     const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service
 
     try {
-        if (service.validate_amount && amount_list) {
+        if (service.validate_amount && amount_list && command.form.amount) {
 
             const { max, min, multiple } = amount_list.amounts
             const amount_service = command.form.amount.replace(/,/gm, '.')
