@@ -19,6 +19,7 @@ import { _referred, referred_pipe } from "./interact/referred.command"
 import { _afiliate, afiliate_pipe } from "./afiliate/afiliate.command"
 import { _activate_afiliate, activate_afiliate_pipe } from "./afiliate/activate.command"
 import { _support } from "./support/support.command"
+import { _error, error_pipe } from "./error/error.command"
 
 export const support = { command: _support }
 export const afiliate = { command: _afiliate, cb: afiliate_pipe }
@@ -41,3 +42,4 @@ export const my_deposits = { command: _myDeposits, cb: my_deposits_pipe }
 export const pay = { command: _pay, cb: pay_pipe, capture: pay_capture }
 export const my_payments = { command: _myPayments, cb: my_payments_pipe }
 export const pin = { command: _pin, cb: pin_pipe }
+export const error_command = { command: _error, cb: error_pipe }
