@@ -25,6 +25,10 @@ export class ChatFactory<T> implements BaseChat<T> {
         return this.ctx$.getValue() as Command
     }
 
+    get client() {
+        return this.service._client
+    }
+
     listen() {
         assertArray(this.commands)
         return this.service.listen()

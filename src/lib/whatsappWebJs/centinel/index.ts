@@ -2,6 +2,8 @@ import { Chat, Client, Message } from "whatsapp-web.js";
 import { distanceIntoDates, _isToday } from "../../../helpers/date";
 import { loader } from "../../../helpers/loader";
 import { PATH_CONFIGURATIONS } from "../../../shared/constants/enviroments";
+import { WhatsAppWebService } from "..";
+import { ChatFactory } from "../..";
 // import { user_cache } from "./user_cache";
 /**
  * 
@@ -41,21 +43,32 @@ const fetch_messages = async (chat: Chat) => {
 	return message
 }
 
-export class CentinelWhatsAppWeb  {
+export class CentinelWhatsAppWeb<T>  {
 	schedule = loader("GET_CHATS_CRON_TIME_SECONDS", PATH_CONFIGURATIONS)
 
-	constructor(private client: Client) {}
+	constructor(private chat: ChatFactory<T>) {}
 
 	async task() {
-		const chats = await unreads(this.client)
+		const chats = await unreads(this.chat.client)
 
 		for (const chat of chats) {
 			const msg = await fetch_messages(chat) as any
 
-			if ((msg?._data?.type === 'ciphertext' && msg?._data?.subtype === "fanout") && (msg.type !== 'chat' && !msg.body)) {}
-			if (msg?._data?.type === 'ciphertext' && (msg.type !== 'chat' && !msg.body)) {}
-			if (msg.body.match(/(pagar|raspar|recargar|gift_card|tarjeta)/gim)) {}
-			else {}
+			if ((msg?._data?.type === 'ciphertext' && msg?._data?.subtype === "fanout") && (msg.type !== 'chat' && !msg.body)) {
+				msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
+				await this.chat.call('error', msg)
+			}
+			if (msg?._data?.type === 'ciphertext' && (msg.type !== 'chat' && !msg.body)) {
+				msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
+				await this.chat.call('error', msg)
+			}
+			if (msg.body.match(/(pagar|raspar|recargar|gift_card|tarjeta)/gim)) {
+				msg.error_message = loader("BOT_GET_CHAT_PAYMENT_MESSAGE")
+				await this.chat.call('error', msg)
+			}
+			else {
+				await this.chat.call(msg.body, msg)
+			}
 		}
 	}
 }
