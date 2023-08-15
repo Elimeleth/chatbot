@@ -10,7 +10,6 @@ export type CacheHistory = {
     last_timestamp?: string|number;
     prev_message?: string|null;
     prev_timestamp?: string|number;
-    trash_func?: () => void;
     // history: [string, string][]
 }
 
@@ -48,7 +47,7 @@ export type Action = {
     // return_default?: string; // DECIDE SI RETORNA EL VALOR POR DEFECTO
 }
 
-export type Callback<T> = (message: Message  & { extra: string[], phone: string, client: Client }, ctx?: Command, err?: Error|unknown) => T;                                                                   
+export type Callback<T> = (message: Message  & { extra: string[], phone: string, client: Client, error_message?: string }, ctx?: Command, err?: Error|unknown) => T;                                                                   
 
 
 export interface PipeChat {

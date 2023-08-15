@@ -147,7 +147,7 @@ export class ChatFactory<T> implements BaseChat<T> {
         return this
     }
 
-    async call(input: string, event: Message & { extra: string[], phone: string, client: Client }) {
+    async call(input: string, event: Message & { extra: string[], phone: string, client: Client, error_message?: string }) {
         await event.react(WAITING_REACTION)
         const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(e => {
             console.log(e)
@@ -206,7 +206,7 @@ export class ChatFactory<T> implements BaseChat<T> {
 
         await event.react(react || FAST_REACTION)
 
-        this.history.save(event.from, {
+        this.history.save({
             last_message: input,
             message_id: event.id.id,
             username: event.from
