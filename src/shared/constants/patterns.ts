@@ -1,4 +1,5 @@
 export const EXPRESSION_PATTERN = {
+    LINK_PREVIEW: /(http|https):\/\/([\w.-]+)(:\d+)?(\/[\w .-]*)*/gim,
     ACTIVE_CODE: /[0-9]*/g,
     SERVICE_CODE: /^[a-zA-Z\s]{0,}/gim,
     SERVICE_BALANCE: /(412)/gi,

@@ -21,16 +21,17 @@ class Banks extends BaseCommand {
     call = async () => await new Promise((resolve, _) => {
         const banks = loader(null, PATH_BANKS) as Bank[]
         const deposit_min_amount = loader("DEPOSIT_MIN_AMOUTN")
-        let message = loader("HEADER_BANKS")
+        let message = loader("HEADER_BANKS") + '\n\n'
         for (const bank of banks) {
             if (bank.status === STATUS_BANK_AVAILABLE) {
                 let name = bank.name
                 let owner_name = bank.owner_name ? '\n'+bank.owner_name : ''
                 let number = bank.number ? '\n'+bank.number : ''
                 let rif = bank.rif ? '\n'+bank.rif : ''
-                message += `\n\n${name}${owner_name}${number}${rif}\n\n${deposit_min_amount}`;
+                message += `${name}${owner_name}${number}${rif}\n\n`;
             }
         }
+        message += deposit_min_amount
         return resolve({
             message,
             status_response: STATUS_RESPONSE_SUCCES,

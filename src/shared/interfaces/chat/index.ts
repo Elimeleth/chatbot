@@ -4,13 +4,10 @@ import { Client, Message, MessageContent, MessageSendOptions } from "whatsapp-we
 import { BaseCommand } from "../commands";
 import { AxiosRequestConfig } from "axios";
 
-export const value_return = z.object({
-    quantity: z.number().describe('quantities of product').default(0),
-    details: z.any().describe('details of product').default({}),
-    products: z.array(z.string()).describe('products array').default([]),
+export const api_response = z.object({
+    status_response: z.string(),
     message: z.string().describe('message'),
-    claim: z.string().describe('claim').default(''),
-    command: z.string().describe('command'),
+    react: z.string().describe('reaction message')
 })
 
 export type Command = {
@@ -27,7 +24,7 @@ export type Command = {
     form?: any;
     captureFunction?: any|undefined;
     return_direct?: boolean; // DECIDE SI RETORNA DIRECTO UNA VEZ ENCUENTRE EL COMANDO
-    value_return?: Partial<z.infer<typeof value_return>>; // VALIDA EL VALOR QUE RETORNA DE ACUERDO A SU TIPO DE DATO
+    api_response?: Partial<z.infer<typeof api_response>>; // VALIDA EL VALOR QUE RETORNA DE ACUERDO A SU TIPO DE DATO
     action: AxiosRequestConfig // ACCION A REALIZAR
 }
 

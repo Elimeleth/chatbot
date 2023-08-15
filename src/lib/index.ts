@@ -1,5 +1,5 @@
 import { BehaviorSubject } from "rxjs";
-import { Action, BaseChat, BaseChatService, Callback, Command, value_return } from "../shared/interfaces/chat";
+import { Action, BaseChat, BaseChatService, Callback, Command, api_response } from "../shared/interfaces/chat";
 import { assert, assertArray } from "./assertions";
 import { BaseCommand } from "../shared/interfaces/commands";
 import { Client, Message } from "whatsapp-web.js";
@@ -9,6 +9,7 @@ import { FAST_REACTION, WAITING_REACTION, WARNING_REACTION } from "../shared/con
 import { WhatsAppWebService } from "./whatsappWebJs";
 import { buildFormData } from "../services/form/form-data";
 import { loader } from "../helpers/loader";
+import { EXPRESSION_PATTERN } from "../shared/constants/patterns";
 
 export class ChatFactory<T> implements BaseChat<T> {
     private commands: Command[] = [];
@@ -168,7 +169,7 @@ export class ChatFactory<T> implements BaseChat<T> {
                 await fallback(null, null, new Error(e.message))
             }
         })
-        let retrieve: APIResponse | null = null
+        let retrieve: APIResponse| APIResponse[] | null = null
 
         try {
 
@@ -178,18 +179,14 @@ export class ChatFactory<T> implements BaseChat<T> {
             console.log({
                 command
             })
-            // if (command?.action?.validate_value_return) value_return.parse(command.value_return)
 
             // @ts-ignore
             assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
 
-            retrieve = await command.call()
-            assert(!!(retrieve?.message), "Response must dont be empty")
+            retrieve = await command.call() as unknown as APIResponse | APIResponse[]
+            assert(!Array.isArray(retrieve) && !!(retrieve?.message), loader("BOT_ERROR_FLOW"))
             console.log({ retrieve })
         } catch (e: any) {
-            console.log({
-                e
-            })
             retrieve = await new Promise((resolve) => resolve({
                 message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("BOT_ERROR_FLOW"),
                 status_response: STATUS_RESPONSE_FAILED,
@@ -200,12 +197,25 @@ export class ChatFactory<T> implements BaseChat<T> {
         }
 
         command.MessageSendOptions ||= {}
-        const { message, status_response, react } = retrieve as unknown as APIResponse
-        
         command.action.data = null
-        this.service.send(event.from, message, command.MessageSendOptions)
+        command.MessageSendOptions.quotedMessageId = event.id.id
+        
+        if (Array.isArray(retrieve)) {
+            for (const ret in retrieve) {
+                const { message, react } = ret as unknown as APIResponse
+                command.MessageSendOptions.linkPreview = !!(message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
+                this.service.send(event.from, message, command.MessageSendOptions)
+        
+                await event.react(react || FAST_REACTION)
+            }
+        }else {
+            const { message, react } = retrieve as APIResponse
+            command.MessageSendOptions.linkPreview = !!(message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
+            this.service.send(event.from, message, command.MessageSendOptions)
 
-        await event.react(react || FAST_REACTION)
+            await event.react(react || FAST_REACTION)
+        }
+
     }
 
 }
