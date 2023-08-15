@@ -1,8 +1,18 @@
 import z from "zod"
 import { APIResponse } from "../api/fetch-response";
 import { Client, Message, MessageContent, MessageSendOptions } from "whatsapp-web.js";
-import { BaseCommand } from "../commands";
 import { AxiosRequestConfig } from "axios";
+
+export type CacheHistory = {
+    message_id: string;
+    username: string;
+    last_message: string;
+    last_timestamp?: string|number;
+    prev_message?: string|null;
+    prev_timestamp?: string|number;
+    trash_func?: () => void;
+    // history: [string, string][]
+}
 
 export const api_response = z.object({
     status_response: z.string(),
@@ -67,7 +77,7 @@ export abstract class BaseChatService {
         name: string;
         cb: any
     }[]): void
-    abstract cron (schedule: any): void
+    abstract cron (schedule: any, cb: any): void
     abstract status(status: 'seen'|'typing'|'stop', chatId: string): Promise<void>
     abstract send(to: string, message: MessageContent, options?: MessageSendOptions): Promise<any>
 }

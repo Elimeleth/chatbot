@@ -10,9 +10,11 @@ import { WhatsAppWebService } from "./whatsappWebJs";
 import { buildFormData } from "../services/form/form-data";
 import { loader } from "../helpers/loader";
 import { EXPRESSION_PATTERN } from "../shared/constants/patterns";
+import { Cache } from "../services/cache/history-cache";
 
 export class ChatFactory<T> implements BaseChat<T> {
     private commands: Command[] = [];
+    private history = new Cache()
     private ctx$ = new BehaviorSubject<Command | null>(null)
 
     constructor(private bot_name: string, private service: WhatsAppWebService) { }
@@ -197,11 +199,18 @@ export class ChatFactory<T> implements BaseChat<T> {
         command.action.data = null
         // command.MessageSendOptions.quotedMessageId = event.id.id
 
-        const { message, react } = retrieve as unknown as APIResponse
+        let { message, react } = retrieve as unknown as APIResponse
+        if (this.history.existHistory(event.from, input)) message = loader("BOT_ERROR_CACHE_DUPLICATE")
         command.MessageSendOptions.linkPreview = !!(message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
         this.service.send(event.from, message, command.MessageSendOptions)
 
         await event.react(react || FAST_REACTION)
+
+        this.history.save(event.from, {
+            last_message: input,
+            message_id: event.id.id,
+            username: event.from
+        })
     }
 
 }

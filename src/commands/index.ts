@@ -18,7 +18,9 @@ import { _activate_socios, activate_socios_pipe } from "./socios/socios-activate
 import { _referred, referred_pipe } from "./interact/referred.command"
 import { _afiliate, afiliate_pipe } from "./afiliate/afiliate.command"
 import { _activate_afiliate, activate_afiliate_pipe } from "./afiliate/activate.command"
+import { _support } from "./support/support.command"
 
+export const support = { command: _support }
 export const afiliate = { command: _afiliate, cb: afiliate_pipe }
 export const activate_afiliate = { command: _activate_afiliate, cb: activate_afiliate_pipe }
 export const welcome = { command: _welcome }

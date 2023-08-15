@@ -38,6 +38,8 @@ export const URL_NOTICIA_EVENT = URL_API+String(process.env.URL_NOTICIA_EVENT)
 // * ====================================================
 
 // [FILES]
+export const PATH_CONFIGURATIONS = process.env.FILE_CONFIGURATIONS
+export const PATH_USER_HISTORY = process.env.FILE_USER_HISTORY
 export const PATH_BANKS = process.env.FILE_BANKS
 export const PATH_FILE_SERVICES_CODES = process.env.FILE_SERVICES_CODES
 export const PATH_FILE_SERVICES_AMOUNTS = process.env.FILE_SERVICES_AMOUNTS

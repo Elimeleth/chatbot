@@ -1,6 +1,7 @@
 export const WAITING_REACTION = '⏱️'
 export const BANK_REACTION = '🏦'
 export const LEARN_REACTION = '🤓'
+export const SUPPORT_REACTION = '😣'
 export const FAST_REACTION = '⚡'
 export const INFO_REACTION = 'ℹ️'
 export const WARNING_REACTION = '❕'

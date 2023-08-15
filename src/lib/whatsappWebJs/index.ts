@@ -3,6 +3,8 @@ import { BaseChatService, PipeChat } from "../../shared/interfaces/chat";
 import { CLIENT_OPTIONS } from "../../shared/constants/whatsapp-web";
 import { delay } from "../delay";
 import { assert } from "../assertions";
+import * as job from "node-cron"
+import { Cache } from "../../services/cache/history-cache";
 
 export class WhatsAppWebService extends BaseChatService {
     private client!: Client
@@ -37,8 +39,15 @@ export class WhatsAppWebService extends BaseChatService {
     }
 
 
-    cron(schedule: any): void {
-        throw new Error("Method not implemented.");
+    cron(schedule: string, cb: any): void {
+        const sch = job.schedule(schedule, cb, {
+            name: 'get-chats',
+            recoverMissedExecutions: true,
+            runOnInit: false,
+            scheduled: false
+        })
+
+        sch.start()
     }
 
     attachEvents(events: {
@@ -88,7 +97,6 @@ export class WhatsAppWebService extends BaseChatService {
 
         await this.status('stop', to)
         await this.client.sendPresenceUnavailable()
-        
         return ack
     }
 }
