@@ -161,7 +161,6 @@ export class ChatFactory<T> implements BaseChat<T> {
         const extra = intent ? intent[0] : ''
         command.captureCommand = extra
         command.deliveryMessage = async (wait_message: string|undefined) => {
-
             await event.react(WAITING_REACTION)
             if (wait_message) {
                 await this.service.send(event.from, wait_message, command.MessageSendOptions)
@@ -222,12 +221,12 @@ export class ChatFactory<T> implements BaseChat<T> {
 
             this.history.save({
                 last_message: input,
-                last_message_bot: retrieve.message,
                 last_timestamp: Date.now(),
-                last_timestamp_bot: Date.now(),
                 message_id: event.id.id,
                 username: event.from
             })
+
+
         }
 
         event.extra = event.body.replace(new RegExp(extra, 'gim'), '').trim().split(' ').filter((word) => Boolean(word))

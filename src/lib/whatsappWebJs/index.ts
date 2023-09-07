@@ -5,6 +5,7 @@ import { delay } from "../delay";
 import { assert } from "../assertions";
 import * as job from "node-cron"
 import { CentinelWhatsAppWeb } from "./centinel";
+import { cache } from "../../services/cache/history-cache";
 
 
 export class WhatsAppWebService extends BaseChatService {
@@ -86,6 +87,13 @@ export class WhatsAppWebService extends BaseChatService {
 
     async send(to: string, message: MessageContent, messageSendOptions: MessageSendOptions | undefined) {
         assert(to.includes("@c.us"), "to must include @c.us")
+        if (typeof message === 'string' && cache.antispam(to, message)) return;
+        
+        cache.save({
+            last_message_bot: message as string,
+            last_timestamp_bot: Date.now(),
+            username: to
+        })
 
         await delay(900)
         await this.client.sendPresenceAvailable()

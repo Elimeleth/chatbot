@@ -56,7 +56,8 @@ class Cache {
         return spam
     }
 
-    save(payload: CacheHistory) {
+    save(payload: Partial<CacheHistory>) {
+        if (!payload.username) return
         // let history = this.history || []
 
         const user = this.users.get(payload.username) || null
@@ -70,7 +71,7 @@ class Cache {
             payload = Object.assign(user, payload)
         }
         
-        this.users.set(payload.username, payload)
+        this.users.set(payload.username as string, payload)
         // history = history.filter(hst => hst.username !== payload.username)
         // history.push(payload)
         // fs.writeFileSync(PATH_USER_HISTORY as string, JSON.stringify(history, undefined, 1))

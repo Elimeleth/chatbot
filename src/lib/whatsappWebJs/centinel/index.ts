@@ -58,7 +58,7 @@ export class CentinelWhatsAppWeb<T>  {
 
 		for (const chat of chats) {
 			const msg = await fetch_messages(chat) as any
-			if (this.centinel.includes(msg.id.id)) continue
+			if (this.centinel.includes(msg.id.id)) return
 			else this.centinel.push(msg.id.id)
 
 			console.log({

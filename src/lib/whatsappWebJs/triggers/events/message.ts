@@ -1,5 +1,6 @@
 import { Message } from "whatsapp-web.js";
 import { PipeChat } from "../../../../shared/interfaces/chat";
+import { logger } from "../../../../services/logs/winston.log";
 
 const filterMessage = (msg: Message): boolean => !!(
     msg.fromMe ||

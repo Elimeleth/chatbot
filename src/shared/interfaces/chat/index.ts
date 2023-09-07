@@ -7,10 +7,10 @@ export type CacheHistory = {
     message_id: string;
     username: string;
     last_message: string;
+    last_message_bot: string;
     last_timestamp?: string|number;
     prev_message?: string;
     prev_timestamp?: string|number;
-    last_message_bot: string;
     last_timestamp_bot?: string|number;
     prev_message_bot?: string|null;
     prev_timestamp_bot?: string|number;
