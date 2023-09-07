@@ -24,7 +24,7 @@ export class Cache {
             
             fs.writeFileSync(PATH_USER_HISTORY as string, JSON.stringify(
                 history.filter(hst => 
-                    distanceIntoDates(Number(hst.last_timestamp), Date.now(), 'minutes') > 1
+                    distanceIntoDates(Number(hst.last_timestamp) * 1000, Date.now(), 'minutes') > 1
                     )
                 , undefined, 1))
         })
@@ -58,25 +58,16 @@ export class Cache {
 
         const user = this.find(payload.username)
 
-        const data: CacheHistory =  {
-            username: payload.username,
-            message_id: payload.message_id,
-            last_message: payload.last_message,
-            last_timestamp: Date.now()
-        }
-        
-        if (!user) {
-            history.push(data)
-        }else {
+        if (user) {
             payload.last_timestamp = Date.now()
             payload.prev_message = user.last_message
             payload.prev_timestamp = user.last_timestamp
-
-            history = history.filter(hst => hst.username !== payload.username)
-            history.push(payload)
+        }else {
+            payload.last_timestamp = Date.now()
         }
 
-
+        history = history.filter(hst => hst.username !== payload.username)
+        history.push(payload)
         fs.writeFileSync(PATH_USER_HISTORY as string, JSON.stringify(history, undefined, 1))
     }
 }

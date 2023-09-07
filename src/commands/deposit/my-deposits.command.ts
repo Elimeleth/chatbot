@@ -45,6 +45,6 @@ export const my_deposits_pipe = _myDeposits.pipe(async (msg, command) => {
 
     command.call = _myDeposits.call
     // @ts-ignore
-    await command.deliveryMessage(loader("WAIT_MY_PAYMENTS"))
+    await command.deliveryMessage(loader("WAIT_MY_DEPOSITS"))
     
 })
