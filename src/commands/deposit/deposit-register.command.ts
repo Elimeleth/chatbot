@@ -53,5 +53,7 @@ export const deposit_register_pipe = _depositRegister.pipe(async (msg, command) 
     command.form.type = msg.body.startsWith('transferencia') ? 'TRANSFER' : 'PM'
     
     command.call = _depositRegister.call
+    // @ts-ignore
+    await command.deliveryMessage(loader("WAIT_DEPOSIT"))
 
 })

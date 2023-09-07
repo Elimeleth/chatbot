@@ -135,6 +135,8 @@ export const deposit_capture = _deposit.pipe((msg, command) => {
         })
     }else {
         command.call = _deposit.call
+        // @ts-ignore
+        await command.deliveryMessage(loader("WAIT_DEPOSIT"))
     }
 
 })

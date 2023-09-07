@@ -1,3 +1,4 @@
+import { loader } from "../../helpers/loader";
 import { objectToString } from "../../helpers/util";
 import { httpClient } from "../../services/http";
 import { URL_PAGOS } from "../../shared/constants/enviroments";
@@ -43,4 +44,6 @@ export const my_payments_pipe = _myPayments.pipe((msg, command) => {
     command.action.url += objectToString(command.form)
 
     command.call = _myPayments.call
+    // @ts-ignore
+    await command.deliveryMessage(loader("WAIT_MY_PAYMENTS"))
 })

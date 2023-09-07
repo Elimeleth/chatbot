@@ -66,4 +66,6 @@ export const afiliate_pipe = _afiliate.pipe((msg, command) => {
     command.form.name;
     
     command.call = _afiliate.call
+    // @ts-ignore
+    await command.deliveryMessage(loader("WAIT_AFILIATE"))
 })

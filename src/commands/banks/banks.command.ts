@@ -58,3 +58,8 @@ class Banks extends BaseCommand {
 }
 
 export const _banks = new Banks('bancos')
+export const _banks_pipe = _banks.pipe((command) => {
+    if (!command) return false
+    // @ts-ignore
+    await command.deliveryMessage()
+})

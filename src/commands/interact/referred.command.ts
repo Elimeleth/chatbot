@@ -42,4 +42,6 @@ export const referred_pipe = _referred.pipe((msg, command) => {
     command.form = { phone: msg.phone }
     command.action.url += objectToString(command.form)
     command.call = _referred.call
+    // @ts-ignore
+    await command.deliveryMessage()
 })

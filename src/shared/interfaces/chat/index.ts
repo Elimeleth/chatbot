@@ -28,6 +28,7 @@ export type Command = {
     MessageSendOptions?: MessageSendOptions; // PARA FUTURAS VALIDACIONES
     fallbacks?: any[];
     call: () => Promise<APIResponse|null>;
+    deliveryMessage?: (wait_message: string|undefined) => Promise<void>;
     evaluate?: (posible_command: string) => boolean;
     invalid_data?: string[];
     form?: any;
@@ -61,7 +62,7 @@ export abstract class BaseChat<T> {
     abstract addIntentToCommand(key: string, intent: string): this
     abstract addActionToCommand(key: string, action: AxiosRequestConfig): this
     
-    abstract call(input: string, event?: any): Promise<any>
+    abstract call(input: string, event?: any, cb?: (...args: any[]) => Promise<any>): Promise<any>
 }
 
 export abstract class BaseChatService {

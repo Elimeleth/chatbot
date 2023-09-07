@@ -41,4 +41,6 @@ export const bp_pipe = _bp.pipe((msg, command) => {
 
     command.form = { phone: msg.phone }
     command.call = _bp.call
+    // @ts-ignore
+    await command.deliveryMessage(loader("WAIT_POINTS"))
 })

@@ -41,4 +41,6 @@ export const socios_pipe = _socios.pipe((msg, command) => {
     command.form = { phone: msg.phone, type: INFO_SOCIOS }
     command.action.url += objectToString(command.form)
     command.call = _socios.call
+    // @ts-ignore
+    await command.deliveryMessage()
 })

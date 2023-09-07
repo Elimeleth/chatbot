@@ -1,3 +1,4 @@
+import { loader } from "../../helpers/loader";
 import { objectToString } from "../../helpers/util";
 import { httpClient } from "../../services/http";
 import { ACTIVATE_SOCIOS } from "../../shared/constants/api";
@@ -40,4 +41,6 @@ export const activate_socios_pipe = _activate_socios.pipe((msg, command) => {
     command.form = { phone: msg.phone, type: ACTIVATE_SOCIOS }
     command.action.url += objectToString(command.form)
     command.call = _activate_socios.call
+    // @ts-ignore
+    await command.deliveryMessage(loader("WAIT_CONSULT_ACTIVATE_SOCIOS"))
 })

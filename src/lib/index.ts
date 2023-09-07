@@ -34,6 +34,8 @@ export class ChatFactory<T> implements BaseChat<T> {
         return this.service.listen()
     }
 
+
+
     private set _commands(command: Command) {
         this.commands = this.commands.filter(_command => _command.key !== command.key)
         this.commands = [...this.commands, command]
@@ -49,8 +51,8 @@ export class ChatFactory<T> implements BaseChat<T> {
 
         const command = this.commands.find(c =>
             (c.evaluate && c.evaluate(keyOrIntent)) ||
-            ([command_triple, command_double, possible_command].includes(c.key) || 
-            c.intents.some(key => [command_triple, command_double, possible_command].includes(key)))
+            ([command_triple, command_double, possible_command].includes(c.key) ||
+                c.intents.some(key => [command_triple, command_double, possible_command].includes(key)))
         )
 
         if (!command) throw new Error(`Key: (${possible_command}) not found`)
@@ -157,13 +159,68 @@ export class ChatFactory<T> implements BaseChat<T> {
             console.log(e)
             return { command: null, intent: null }
         }) as { command: Command, intent: RegExpMatchArray | null }
-        
+
         if (!command) return
         const extra = intent ? intent[0] : ''
         command.captureCommand = extra
-        
+        command.deliveryMessage = async (wait_message: string|undefined) => {
+
+            if (wait_message) {
+                await this.service.send(event.from, wait_message, command.MessageSendOptions)
+            }
+
+            let retrieve: APIResponse | null = {
+                message: loader("BOT_ERROR_CACHE_DUPLICATE"),
+                status_response: STATUS_RESPONSE_FAILED,
+                react: WARNING_REACTION
+            }
+
+            if (!this.history.existHistory(event.from, input)){
+                try {
+
+                    if (command.action.method !== 'GET' && command.form) {
+                        command.action.data = buildFormData(command.form)
+                    }
+    
+                    // @ts-ignore
+                    assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
+    
+                    retrieve = await command.call() as unknown as APIResponse
+                    assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
+                    console.log({ retrieve })
+                } catch (e: any) {
+                    retrieve = {
+                        message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("BOT_ERROR_FLOW"),
+                        status_response: STATUS_RESPONSE_FAILED,
+                        react: WARNING_REACTION
+                    }
+    
+                    command.invalid_data = []
+                }
+            }
+            
+            command.MessageSendOptions ||= {}
+            command.action.data = null
+            // command.MessageSendOptions.quotedMessageId = event.id.id
+
+            command.MessageSendOptions = {
+                ...command.MessageSendOptions,
+                linkPreview: !!(retrieve.message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
+            }
+
+            this.service.send(event.from, retrieve.message, command.MessageSendOptions)
+
+            await event.react(retrieve.react || FAST_REACTION)
+
+            this.history.save({
+                last_message: input,
+                message_id: event.id.id,
+                username: event.from
+            })
+        }
+
         event.extra = event.body.replace(new RegExp(extra, 'gim'), '').trim().split(' ').filter((word) => Boolean(word))
-        
+
         event.phone = event.from.split("@")[0]
 
         // event.client = this.service.client
@@ -174,46 +231,6 @@ export class ChatFactory<T> implements BaseChat<T> {
             } catch (e: any) {
                 await fallback(null, null, new Error(e.message))
             }
-        })
-        let retrieve: APIResponse| APIResponse[] | null = null
-
-        try {
-
-            if (command.action.method !== 'GET' && command.form) {
-                command.action.data = buildFormData(command.form)
-            }
-
-            // @ts-ignore
-            assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
-
-            retrieve = await command.call() as unknown as APIResponse
-            assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
-            console.log({ retrieve })
-        } catch (e: any) {
-            retrieve = await new Promise((resolve) => resolve({
-                message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("BOT_ERROR_FLOW"),
-                status_response: STATUS_RESPONSE_FAILED,
-                react: WARNING_REACTION
-            }))
-
-            command.invalid_data = []
-        }
-
-        command.MessageSendOptions ||= {}
-        command.action.data = null
-        // command.MessageSendOptions.quotedMessageId = event.id.id
-
-        let { message, react } = retrieve as unknown as APIResponse
-        if (this.history.existHistory(event.from, input)) message = loader("BOT_ERROR_CACHE_DUPLICATE")
-        command.MessageSendOptions.linkPreview = !!(message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
-        this.service.send(event.from, message, command.MessageSendOptions)
-
-        await event.react(react || FAST_REACTION)
-
-        this.history.save({
-            last_message: input,
-            message_id: event.id.id,
-            username: event.from
         })
     }
 

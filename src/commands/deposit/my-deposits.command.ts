@@ -43,5 +43,7 @@ export const my_deposits_pipe = _myDeposits.pipe((msg, command) => {
     command.action.url += objectToString(command.form)
 
     command.call = _myDeposits.call
+    // @ts-ignore
+    await command.deliveryMessage(loader("WAIT_MY_PAYMENTS"))
     
 })

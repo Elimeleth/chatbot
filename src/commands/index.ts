@@ -8,28 +8,28 @@ import { _pay, pay_capture, pay_pipe } from "./pay/pay.command"
 import { _pin, pin_pipe } from "./pines/pines.command"
 import { _serviceAmount, service_amount_pipe } from "./services/amount.command"
 import { _myPayments, my_payments_pipe } from "./pay/my-payments.command"
-import { _welcome } from "./interact/welcome.command"
-import { _tutorial } from "./interact/tutorial.command"
-import { _extra_tutorial } from "./interact/extra-commands.command"
-import { _services } from "./interact/services.command"
-import { _banks } from "./banks/banks.command"
+import { _welcome, _welcome_pipe } from "./interact/welcome.command"
+import { _tutorial, _tutorial_pipe } from "./interact/tutorial.command"
+import { _extra_tutorial, _extra_tutorial_pipe } from "./interact/extra-commands.command"
+import { _services, _services_pipe } from "./interact/services.command"
+import { _banks, _banks_pipe } from "./banks/banks.command"
 import { _socios, socios_pipe } from "./socios/socios.command"
 import { _activate_socios, activate_socios_pipe } from "./socios/socios-activate.command"
 import { _referred, referred_pipe } from "./interact/referred.command"
 import { _afiliate, afiliate_pipe } from "./afiliate/afiliate.command"
 import { _activate_afiliate, activate_afiliate_pipe } from "./afiliate/activate.command"
-import { _support } from "./support/support.command"
+import { _support, _support_pipe } from "./support/support.command"
 import { _error, error_pipe } from "./error/error.command"
 
-export const support = { command: _support }
+export const support = { command: _support, cb: _support_pipe }
 export const afiliate = { command: _afiliate, cb: afiliate_pipe }
 export const activate_afiliate = { command: _activate_afiliate, cb: activate_afiliate_pipe }
-export const welcome = { command: _welcome }
-export const commands = { command: _tutorial }
-export const extra_commands = { command: _extra_tutorial }
+export const welcome = { command: _welcome, cb: _welcome_pipe }
+export const commands = { command: _tutorial, cb: _tutorial_pipe }
+export const extra_commands = { command: _extra_tutorial, cb: _extra_tutorial_pipe }
 export const referred = { command: _referred, cb: referred_pipe }
-export const services = { command: _services }
-export const banks = { command: _banks }
+export const services = { command: _services, cb: _services_pipe }
+export const banks = { command: _banks, cb: _banks_pipe }
 export const socios = { command: _socios, cb: socios_pipe }
 export const activate_socios = { command: _activate_socios, cb: activate_socios_pipe }
 export const service_amounts = { command: _serviceAmount, cb: service_amount_pipe }

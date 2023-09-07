@@ -107,8 +107,10 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
             : command.action.url += queries
 
         command.form = null
-        
         command.call = _balance.call
+
+        // @ts-ignore
+        await command.deliveryMessage(loader("WAIT_CONSULT"))
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
             message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("CONSULT"),
@@ -117,5 +119,8 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
         }))
 
         command.action.data = null
+
+        // @ts-ignore
+        await command.deliveryMessage()
     }
 })

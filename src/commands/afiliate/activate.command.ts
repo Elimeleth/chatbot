@@ -56,4 +56,6 @@ export const activate_afiliate_pipe = _activate_afiliate.pipe((msg, command) => 
     command.invalid_data = extra
     
     command.call = _activate_afiliate.call
+    // @ts-ignore
+    await command.deliveryMessage(loader("WAIT_ACTIVATE_AFILIATE"))
 })

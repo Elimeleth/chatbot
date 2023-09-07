@@ -42,3 +42,8 @@ class ExtraTutorial extends BaseCommand {
 }
 
 export const _extra_tutorial = new ExtraTutorial('otros comandos')
+export const _extra_tutorial_pipe = _extra_tutorial.pipe((command) => {
+    if (!command) return false
+    // @ts-ignore
+    await command.deliveryMessage()
+})

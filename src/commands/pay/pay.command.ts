@@ -120,8 +120,28 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         assert(command.form.contract_number || !!(service?.recharge && !command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
 
         command.invalid_data = extra.filter(e => msg.extra.includes(e))
+
+        const parse_message = command.form.gif_code ? loader("CONFIRMATION_PAYMENT_WITH_GIFTCARD") : loader("CONFIRMATION_PAYMENT")
+
+        let message = parse_message_output(parse_message, [
+            {
+                key: '[SERVICE]',
+                value: `${service?.name}`
+            }, {
+                key: '[AMOUNT]',
+                value: `${command.form.amount || 'el *monto mínimo* del servicio'}`
+            }, {
+                key: '[CONTRACT_NUMBER]',
+                value: String(command.form.contract_number)
+            }, {
+                key: '[GIFTCARD]',
+                value: String(command.form.gif_code)
+            }
+        ]).replace(/BOT:/gim, '').trim()
         
         command.call = _pay.call
+        // @ts-ignore
+        await command.deliveryMessage(message)
         command.error_message = ''
     } catch (e: any) {
         const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*`}]).replace(/BOT:/gim, '').trim()
@@ -132,6 +152,8 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         }))
 
         command.error_message = message
+        // @ts-ignore
+        await command.deliveryMessage()
     }
 })
 
@@ -152,7 +174,6 @@ export const pay_capture = _pay.pipe((_, command) => {
             assert((Number(amount_service) > Number(min)), loader("BOT_ERROR_PAYMENT_MIN_AMOUNT"))
             assert((Number(amount_service) < Number(max)), loader("BOT_ERROR_PAYMENT_MAX_AMOUNT"))
             assert((Number(amount_service) % Number(multiple) === 0), loader("BOT_ERROR_PAYMENT_MULTIPLE_AMOUNT"))
-
         }
     } catch (error: any) {
         let message = parse_message_output(error.message, [
@@ -178,5 +199,7 @@ export const pay_capture = _pay.pipe((_, command) => {
                 react: ERROR_INVALID_DATA_REACTION
             })
         })
+        // @ts-ignore
+        await command.deliveryMessage()
     }
 })

@@ -43,4 +43,7 @@ export const activateBp_pipe = _activateBp.pipe((msg, command) => {
     command.form = { phone: msg.phone, type: ACTIVATE_POINTS }
 
     command.call = _activateBp.call
+
+    // @ts-ignore
+    await command.deliveryMessage(loader("WAIT_ACTIVATE_POINTS"))
 })
