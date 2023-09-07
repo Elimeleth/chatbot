@@ -1,4 +1,4 @@
-import { activate_afiliate, activate_points, activate_socios, afiliate, balance, banks, commands, deposit, deposit_register, error_command, extra_commands, my_deposits, my_payments, pay, pin, points, referred, service_amounts, services, socios, support, welcome } from "./commands";
+import { activate_afiliate, activate_points, activate_socios, afiliate, balance, banks, commands, deposit, deposit_register, error_command, extra_commands, my_deposits, my_payments, my_tickets, pay, pin, points, referred, service_amounts, services, socios, support, welcome } from "./commands";
 import { ChatFactory } from "./lib";
 import { WhatsAppWebService } from "./lib/whatsappWebJs";
 import { EVENTS } from "./lib/whatsappWebJs/triggers";
@@ -26,12 +26,12 @@ const mainLoop = async () => {
         .addCommand(afiliate.command).useFunction(afiliate.cb)
         .addCommand(activate_afiliate.command).useFunction(activate_afiliate.cb)
         
-        .addCommand(support.command)
-        .addCommand(welcome.command)
-        .addCommand(commands.command)
-        .addCommand(extra_commands.command)
-        .addCommand(services.command)
-        .addCommand(banks.command)
+        .addCommand(support.command).useFunction(support.cb)
+        .addCommand(welcome.command).useFunction(welcome.cb)
+        .addCommand(commands.command).useFunction(commands.cb)
+        .addCommand(extra_commands.command).useFunction(extra_commands.cb)
+        .addCommand(services.command).useFunction(services.cb)
+        .addCommand(banks.command).useFunction(banks.cb)
         
         .addCommand(referred.command).useFunction(referred.cb)
         .addCommand(socios.command).useFunction(socios.cb)
@@ -48,6 +48,8 @@ const mainLoop = async () => {
         .addCommand(pay.command).useFunction(pay.cb).useFunction(pay.capture)
         .addCommand(my_payments.command).useFunction(my_payments.cb)
         .addCommand(pin.command).useFunction(pin.cb)
+
+        .addCommand(my_tickets.command).useFunction(my_tickets.cb)
 
         .addCommand(error_command.command).useFunction(error_command.cb)
     // * ================================================================
