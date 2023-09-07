@@ -110,10 +110,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         }
         
         command.form.service_code = service?.service_code
-        console.log({
-            command,
-            form: command.form
-        })
+        
         assert(command.captureCommand !== 'raspar' && !command.form.gif_code, loader("HOW_SCRAPE"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
         // assert(command.form.service_code && !!(!command.form.amount && !service?.pin), loader("HOW_PAYMENT"))
@@ -144,7 +141,6 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         await command.deliveryMessage(message)
         command.error_message = ''
     } catch (e: any) {
-        console.log(e)
         const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*`}]).replace(/BOT:/gim, '').trim()
         command.call = async () => await new Promise((resolve) => resolve({
             message,
@@ -165,10 +161,6 @@ export const pay_capture = _pay.pipe(async (_, command) => {
     const amount_list = amounts.find(amount => amount.code === command.form.service_code) as Amount
     const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service
 
-    console.log(service.validate_amount, {
-        amount_list,
-        amount: command.form.amount
-    })
     try {
         assert(!command.error_message, command.error_message)
         if (service.validate_amount && amount_list && command.form.amount) {

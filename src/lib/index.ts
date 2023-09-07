@@ -10,11 +10,11 @@ import { WhatsAppWebService } from "./whatsappWebJs";
 import { buildFormData } from "../services/form/form-data";
 import { loader } from "../helpers/loader";
 import { EXPRESSION_PATTERN } from "../shared/constants/patterns";
-import { Cache } from "../services/cache/history-cache";
+import { cache } from "../services/cache/history-cache";
 
 export class ChatFactory<T> implements BaseChat<T> {
     private commands: Command[] = [];
-    private history = new Cache()
+    private history = cache
     private ctx$ = new BehaviorSubject<Command | null>(null)
 
     constructor(private bot_name: string, private service: WhatsAppWebService) { }
@@ -153,9 +153,7 @@ export class ChatFactory<T> implements BaseChat<T> {
     }
 
     async call(input: string, event: Message & { extra: string[], phone: string, client: Client, error_message?: string }) {
-        await event.react(WAITING_REACTION)
         const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(e => {
-            console.log(e)
             return { command: null, intent: null }
         }) as { command: Command, intent: RegExpMatchArray | null }
 
@@ -164,17 +162,25 @@ export class ChatFactory<T> implements BaseChat<T> {
         command.captureCommand = extra
         command.deliveryMessage = async (wait_message: string|undefined) => {
 
+            await event.react(WAITING_REACTION)
             if (wait_message) {
                 await this.service.send(event.from, wait_message, command.MessageSendOptions)
             }
 
             let retrieve: APIResponse | null = {
-                message: loader("BOT_ERROR_CACHE_DUPLICATE"),
+                message: '',
                 status_response: STATUS_RESPONSE_FAILED,
                 react: WARNING_REACTION
             }
 
-            if (!this.history.existHistory(event.from, input)){
+            const cached = this.history.existHistory(event.from, {
+                last_message: input,
+                message_id: event.id.id,
+                last_timestamp: event.timestamp
+            })
+
+            if (!cached){
+                retrieve.message = loader("BOT_ERROR_CACHE_DUPLICATE")
                 try {
 
                     if (command.action.method !== 'GET' && command.form) {
@@ -183,7 +189,7 @@ export class ChatFactory<T> implements BaseChat<T> {
     
                     // @ts-ignore
                     assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
-    
+                    
                     retrieve = await command.call() as unknown as APIResponse
                     assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
                     console.log({ retrieve })
@@ -207,12 +213,18 @@ export class ChatFactory<T> implements BaseChat<T> {
                 linkPreview: !!(retrieve.message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
             }
 
-            this.service.send(event.from, retrieve.message, command.MessageSendOptions)
 
             await event.react(retrieve.react || FAST_REACTION)
+            if (!retrieve.message) return;
+            if (cache.antispam(event.from, retrieve.message)) return;
+
+            this.service.send(event.from, retrieve.message, command.MessageSendOptions)
 
             this.history.save({
                 last_message: input,
+                last_message_bot: retrieve.message,
+                last_timestamp: Date.now(),
+                last_timestamp_bot: Date.now(),
                 message_id: event.id.id,
                 username: event.from
             })
@@ -228,7 +240,6 @@ export class ChatFactory<T> implements BaseChat<T> {
             try {
                 await fallback(event, command)
             } catch (e: any) {
-                console.log(e)
                 await fallback(null, null, new Error(e.message))
             }
         })

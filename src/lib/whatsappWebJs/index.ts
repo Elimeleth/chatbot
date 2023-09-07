@@ -5,7 +5,6 @@ import { delay } from "../delay";
 import { assert } from "../assertions";
 import * as job from "node-cron"
 import { CentinelWhatsAppWeb } from "./centinel";
-import { ChatFactory } from "..";
 
 
 export class WhatsAppWebService extends BaseChatService {
@@ -88,10 +87,10 @@ export class WhatsAppWebService extends BaseChatService {
     async send(to: string, message: MessageContent, messageSendOptions: MessageSendOptions | undefined) {
         assert(to.includes("@c.us"), "to must include @c.us")
 
-        await delay(1500)
+        await delay(900)
         await this.client.sendPresenceAvailable()
         await this.status('typing', to)
-        await delay(1500)
+        await delay(900)
 
         const ack = this.client.sendMessage(to, message, {
             sendSeen: true,

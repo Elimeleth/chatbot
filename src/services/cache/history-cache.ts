@@ -1,11 +1,12 @@
 import { distanceIntoDates } from "../../helpers/date";
 import { loader } from "../../helpers/loader";
-import { PATH_USER_HISTORY } from "../../shared/constants/enviroments";
+import { PATH_CONFIGURATIONS, PATH_USER_HISTORY } from "../../shared/constants/enviroments";
 import { CacheHistory } from "../../shared/interfaces/chat";
 import fs from "fs"
 import * as job from "node-cron"
 
-export class Cache {
+class Cache {
+    users = new Map<string, any>();
 
     constructor() {
         this.task();
@@ -17,57 +18,63 @@ export class Cache {
 
     private task () {
         job.schedule('* * * * *', () => {
-            const history = this.history
+            if (!this.users.size) return
 
-            if (!history || !history.length) return
-
-            
-            fs.writeFileSync(PATH_USER_HISTORY as string, JSON.stringify(
-                history.filter(hst => 
-                    distanceIntoDates(Number(hst.last_timestamp) * 1000, Date.now(), 'minutes') > 1
-                    )
-                , undefined, 1))
+            for (const [username, value] of this.users) {
+                const diff = distanceIntoDates(Number(value.last_timestamp) * 1000, Date.now(), 'minutes')
+                if (diff > 1) {
+                    this.users.delete(username)
+                }
+            }
         })
     }
 
-    existHistory (username: string, query: string) {
-        const history = this.history
-
-        if (!history || !history.length) return false
-
-        return history.some(history => (
-            history.username === username &&
-            [history.last_message, 
-                history.message_id].includes(query)
-        ))
+    existHistory (username: string, data: Partial<CacheHistory>) {
+        const user = this.users.get(username) as CacheHistory
+        return !!(
+            user &&
+            !!(
+            user.message_id === data.message_id ||
+            user.last_message === data.last_message ||
+            user.last_timestamp === data.last_timestamp
+            )
+        )
     }
 
-    find(query: string): CacheHistory|null {
-        const history = this.history
-        
-        if (!history || history.length) return null
+    antispam (username: string, last_message_bot: string) {
+        if (!this.users.has(username)) return false
+    
+        const user = this.users.get(username)
+        const diff = distanceIntoDates(Number(user.last_timestamp_bot), Date.now(), 'seconds')
 
-        return history.find(history => (
-            [history.last_message, 
-                history.message_id, history.username].includes(query)
-        )) || null
+        console.log('antispam', user.last_message_bot === last_message_bot, diff)
+        let spam = false
+        if (user.last_message_bot === last_message_bot && diff < Number(loader("ANTISPAM_EVALUATE_SECONDS", PATH_CONFIGURATIONS))) {
+            spam = true
+        }
+
+        return spam
     }
 
     save(payload: CacheHistory) {
-        let history = this.history || []
+        // let history = this.history || []
 
-        const user = this.find(payload.username)
+        const user = this.users.get(payload.username) || null
 
         if (user) {
-            payload.last_timestamp = Date.now()
             payload.prev_message = user.last_message
+            payload.prev_message_bot = user.last_message_bot
+            payload.prev_timestamp_bot = user.last_timestamp_bot
             payload.prev_timestamp = user.last_timestamp
-        }else {
-            payload.last_timestamp = Date.now()
-        }
 
-        history = history.filter(hst => hst.username !== payload.username)
-        history.push(payload)
-        fs.writeFileSync(PATH_USER_HISTORY as string, JSON.stringify(history, undefined, 1))
+            payload = Object.assign(user, payload)
+        }
+        
+        this.users.set(payload.username, payload)
+        // history = history.filter(hst => hst.username !== payload.username)
+        // history.push(payload)
+        // fs.writeFileSync(PATH_USER_HISTORY as string, JSON.stringify(history, undefined, 1))
     }
 }
+
+export const cache = new Cache()

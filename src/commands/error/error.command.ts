@@ -47,4 +47,7 @@ export const error_pipe = _error.pipe(async (msg, command) => {
             react: '😓'
         })
     })
+
+    // @ts-ignore
+    await command.deliveryMessage()
 })

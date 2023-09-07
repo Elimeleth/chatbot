@@ -2,6 +2,7 @@
 import { io, Socket } from "socket.io-client";
 import { Client, Events, MessageMedia } from "whatsapp-web.js";
 import { EVENT, URL_SOCKET } from "../../shared/constants/enviroments";
+import { action } from "./actions";
 
 // *RETORNA ESTATUS DE CONEXION EN CASO DE ALGUNA EVENTUALIDAD EN WS
 class XClientConnection {
@@ -61,54 +62,8 @@ export const connect_websocket: any = (): void => {
      */
     
     connection.on(EVENT, async(data : any, type: any) => {
-        
-        // try {
-        //     data = typeof data !== 'object' ? JSON.parse(data) : data;
-            
-        //     if (data.session && String(data.session).toLowerCase() === SESSION.toLowerCase()) {
-        //         return action(type, data, client)
-        //     }
-
-        //     let user_history = validaFileExist(LOGS.LOGS_USER, 'sufix', undefined)
-        //     if (user_history) user_history = new Map(Object.entries(user_history))
-
-            
-            
-        //     if (data.phone) {
-        //         if (user_history instanceof Map) {
-        //             try {
-        //                 data.phone = Array.isArray(data.phone) ? data.phone : [data.phone]
-        //                 data.phone.forEach((phone: string) => {
-        //                     if (!user_history.has(phone+'@c.us')) throw Error('user not found')
-                            
-        //                     return action(type, {
-        //                         ...data,
-        //                         phone
-        //                     }, client)
-
-        //                 })
-        //             } catch (error) {
-        //                 handleFileLog.log(LOGS.LOGS_CLIENT, {
-        //                     socket: true,
-        //                     event: type,
-        //                     payload: JSON.stringify(data),
-        //                     error: "Event message not emited"
-        //                 })
-        //             }
-        //         }else {
-        //             handleFileLog.log(LOGS.LOGS_CLIENT, {
-        //                 socket: true,
-        //                 event: type,
-        //                 payload: JSON.stringify(data),
-        //                 error: "Event message not emited"
-        //             })
-        //         }
-        //     }else {
-        //         return action(type, data, client)
-        //     }
-            
-        // } catch (error: any) {
-        //     handleFileLog.traceback_error(error.message);
-        // }
+        try {
+            return action(type, data)
+        } catch (error) {}
     });
 };

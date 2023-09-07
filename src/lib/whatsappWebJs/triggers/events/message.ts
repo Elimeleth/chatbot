@@ -16,7 +16,7 @@ export const message = {
     cb: async (msg: Message, chat: PipeChat|null) => {
         if (filterMessage(msg)) return false;
         
-        if (chat) chat.call(msg.body, msg)
+        // if (chat) chat.call(msg.body, msg)
     }
 }
 

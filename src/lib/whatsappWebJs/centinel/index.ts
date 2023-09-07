@@ -12,11 +12,16 @@ import { ChatFactory } from "../..";
  * BUSQUEDA CONSTANTE DE CHATS PENDIENTES AL HABER INSIDENCIA EN ESTADOS DEL BOT 
  */
 const unreads = async (client: Client) => {
-	const chats = await client.getChats()
-	
-	if (!chats.length) return []
+	try {
+		const chats = await client.getChats()
 
-	return chats.filter(filterChat)
+		if (!chats.length) return []
+
+		return chats.filter(filterChat)
+	} catch (error) {
+		console.log(error)
+		return []
+	}
 };
 
 const filterChat = (chat: Chat): boolean => {
@@ -27,7 +32,7 @@ const filterChat = (chat: Chat): boolean => {
 		&& !chat.isGroup
 		&& !chat.id.user.includes('status')
 		&& !chat.lastMessage.fromMe
-		&& ['chat', 'ciphertext'].includes(chat.lastMessage.type)
+		&& ['chat', 'ciphertext', 'e2e_notification'].includes(chat.lastMessage.type)
 		&& distanceIntoDates(chat.lastMessage.timestamp * 1000, Date.now(), 'seconds') > Number(evaluate_difference)
 	) as boolean
 }
@@ -36,7 +41,7 @@ const fetch_messages = async (chat: Chat) => {
 	const messages = await chat.fetchMessages({ limit: 1, fromMe: false })
 
 	if (!messages.length) return null
-	
+
 	const message = messages[0]
 	if (!message || message.fromMe) return null
 
@@ -45,17 +50,17 @@ const fetch_messages = async (chat: Chat) => {
 
 export class CentinelWhatsAppWeb<T>  {
 	schedule = loader("GET_CHATS_CRON_TIME_SECONDS", PATH_CONFIGURATIONS)
-
-	constructor(private chat: ChatFactory<T>) {}
+	centinel: string[] = []
+	constructor(private chat: ChatFactory<T>) { }
 
 	async task() {
 		const chats = await unreads(this.chat.client)
 
-		console.log("Task running...", {
-			chats
-		})
 		for (const chat of chats) {
 			const msg = await fetch_messages(chat) as any
+			if (this.centinel.includes(msg.id.id)) continue
+			else this.centinel.push(msg.id.id)
+
 			console.log({
 				msg
 			})
@@ -75,6 +80,8 @@ export class CentinelWhatsAppWeb<T>  {
 				await this.chat.call(msg.body, msg)
 			}
 		}
+
+		this.centinel = []
 	}
 }
 
