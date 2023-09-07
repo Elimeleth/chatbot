@@ -110,3 +110,5 @@ export class WhatsAppWebService extends BaseChatService {
         return ack
     }
 }
+
+export const serviceWhatsApp = new WhatsAppWebService('Biyuyo Bot').daemon()
