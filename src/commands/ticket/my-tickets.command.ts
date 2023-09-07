@@ -35,7 +35,7 @@ class MyTickets extends BaseCommand {
 }
 
 export const _myTickets = new MyTickets('mis depositos')
-export const my_tickets_pipe = _myTickets.pipe((msg, command) => {
+export const my_tickets_pipe = _myTickets.pipe(async (msg, command) => {
     if (!command) return false
 
     command.form = { phone: msg.phone }

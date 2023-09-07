@@ -4,7 +4,9 @@ import { CLIENT_OPTIONS } from "../../shared/constants/whatsapp-web";
 import { delay } from "../delay";
 import { assert } from "../assertions";
 import * as job from "node-cron"
-import { Cache } from "../../services/cache/history-cache";
+import { CentinelWhatsAppWeb } from "./centinel";
+import { ChatFactory } from "..";
+
 
 export class WhatsAppWebService extends BaseChatService {
     private client!: Client
@@ -34,7 +36,8 @@ export class WhatsAppWebService extends BaseChatService {
     async listen() {
         const service = await this.client.initialize()
         console.log(`*** USING WHATSAPP WEB VERSION ${await this.version} ***`)
-
+        const centinel = new CentinelWhatsAppWeb(this.chat as any)
+        this.cron(centinel.schedule, async () => await centinel.task())
         return service
     }
 

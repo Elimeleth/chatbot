@@ -52,7 +52,7 @@ class ServiceAmount extends BaseCommand {
 }
 
 export const _serviceAmount = new ServiceAmount('montos')
-export const service_amount_pipe = _serviceAmount.pipe((msg, command) => {
+export const service_amount_pipe = _serviceAmount.pipe(async (msg, command) => {
     if (!command) return false
     
     const [svc, ...rest] = msg.body.split(' ')

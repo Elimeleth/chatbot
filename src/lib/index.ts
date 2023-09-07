@@ -35,7 +35,6 @@ export class ChatFactory<T> implements BaseChat<T> {
     }
 
 
-
     private set _commands(command: Command) {
         this.commands = this.commands.filter(_command => _command.key !== command.key)
         this.commands = [...this.commands, command]
@@ -229,6 +228,7 @@ export class ChatFactory<T> implements BaseChat<T> {
             try {
                 await fallback(event, command)
             } catch (e: any) {
+                console.log(e)
                 await fallback(null, null, new Error(e.message))
             }
         })

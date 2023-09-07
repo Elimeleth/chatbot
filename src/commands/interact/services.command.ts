@@ -42,7 +42,7 @@ class Services extends BaseCommand {
 }
 
 export const _services = new Services('servicios')
-export const _services_pipe = _services.pipe((command) => {
+export const _services_pipe = _services.pipe(async (_, command) => {
     if (!command) return false
     // @ts-ignore
     await command.deliveryMessage()

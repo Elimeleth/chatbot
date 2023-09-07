@@ -42,7 +42,7 @@ class Welcome extends BaseCommand {
 }
 
 export const _welcome = new Welcome('hola')
-export const _welcome_pipe = _welcome.pipe((command) => {
+export const _welcome_pipe = _welcome.pipe(async (_, command) => {
     if (!command) return false
     // @ts-ignore
     await command.deliveryMessage()

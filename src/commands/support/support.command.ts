@@ -42,7 +42,7 @@ class Support extends BaseCommand {
 }
 
 export const _support = new Support('soporte')
-export const _support_pipe = _support.pipe((command) => {
+export const _support_pipe = _support.pipe(async (_, command) => {
     if (!command) return false
     // @ts-ignore
     await command.deliveryMessage()

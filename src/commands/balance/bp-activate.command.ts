@@ -1,3 +1,4 @@
+import { loader } from "../../helpers/loader";
 import { objectToString } from "../../helpers/util";
 import { httpClient } from "../../services/http";
 import { ACTIVATE_POINTS } from "../../shared/constants/api";
@@ -37,7 +38,7 @@ class ActivateBp extends BaseCommand {
 }
 
 export const _activateBp = new ActivateBp('activar puntos')
-export const activateBp_pipe = _activateBp.pipe((msg, command) => {
+export const activateBp_pipe = _activateBp.pipe(async (msg, command) => {
     if (!command) return false
 
     command.form = { phone: msg.phone, type: ACTIVATE_POINTS }

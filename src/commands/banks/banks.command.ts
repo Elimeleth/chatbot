@@ -58,7 +58,7 @@ class Banks extends BaseCommand {
 }
 
 export const _banks = new Banks('bancos')
-export const _banks_pipe = _banks.pipe((command) => {
+export const _banks_pipe = _banks.pipe(async (_, command) => {
     if (!command) return false
     // @ts-ignore
     await command.deliveryMessage()

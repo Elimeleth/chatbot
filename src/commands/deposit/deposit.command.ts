@@ -111,7 +111,7 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
     }
 })
 
-export const deposit_capture = _deposit.pipe((msg, command) => {
+export const deposit_capture = _deposit.pipe(async (msg, command) => {
     if (!command) return false
     
     const banks = loader(null, PATH_BANKS) as Bank[]
@@ -133,6 +133,8 @@ export const deposit_capture = _deposit.pipe((msg, command) => {
                 status_response: STATUS_RESPONSE_FAILED
             })
         })
+        // @ts-ignore
+        await command.deliveryMessage()
     }else {
         command.call = _deposit.call
         // @ts-ignore

@@ -50,7 +50,7 @@ class Pins extends BaseCommand {
 }
 
 export const _pin = new Pins('pin')
-export const pin_pipe = _pin.pipe((msg, command) => {
+export const pin_pipe = _pin.pipe(async (msg, command) => {
     if (!command) return false
     const [svc, ...rest] = msg.body.split(' ')
     const code = service_code(code => 

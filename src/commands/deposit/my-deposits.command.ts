@@ -1,3 +1,4 @@
+import { loader } from "../../helpers/loader";
 import { objectToString } from "../../helpers/util";
 import { httpClient } from "../../services/http";
 import { URL_DEPOSITOS, URL_PAGOS } from "../../shared/constants/enviroments";
@@ -35,7 +36,7 @@ class MyDeposits extends BaseCommand {
 }
 
 export const _myDeposits = new MyDeposits('mis depositos')
-export const my_deposits_pipe = _myDeposits.pipe((msg, command) => {
+export const my_deposits_pipe = _myDeposits.pipe(async (msg, command) => {
     if (!command) return false
 
     command.form = { phone: msg.phone }

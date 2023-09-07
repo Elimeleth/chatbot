@@ -1,3 +1,4 @@
+import { loader } from "../../helpers/loader";
 import { build_form, objectToString } from "../../helpers/util";
 import { httpClient } from "../../services/http";
 import { URL_ACTIVAR } from "../../shared/constants/enviroments";
@@ -37,7 +38,7 @@ class AfiliateActivate extends BaseCommand {
 }
 
 export const _activate_afiliate = new AfiliateActivate('activar')
-export const activate_afiliate_pipe = _activate_afiliate.pipe((msg, command) => {
+export const activate_afiliate_pipe = _activate_afiliate.pipe(async (msg, command) => {
     if (!command) return false
 
     const { extra, form } = build_form(

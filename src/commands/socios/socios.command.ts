@@ -35,7 +35,7 @@ export class Socios extends BaseCommand {
     }
 }
 export const _socios = new Socios('socios');
-export const socios_pipe = _socios.pipe((msg, command) => {
+export const socios_pipe = _socios.pipe(async (msg, command) => {
     if (!command) return false
 
     command.form = { phone: msg.phone, type: INFO_SOCIOS }

@@ -42,7 +42,7 @@ class Tutorial extends BaseCommand {
 }
 
 export const _tutorial = new Tutorial('comandos')
-export const _tutorial_pipe = _tutorial.pipe((command) => {
+export const _tutorial_pipe = _tutorial.pipe(async (_, command) => {
     if (!command) return false
     // @ts-ignore
     await command.deliveryMessage()

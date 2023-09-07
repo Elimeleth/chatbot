@@ -157,7 +157,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
     }
 })
 
-export const pay_capture = _pay.pipe((_, command) => {
+export const pay_capture = _pay.pipe(async (_, command) => {
     if (!command) return false
     
     const amounts = loader(null, PATH_FILE_SERVICES_AMOUNTS) as Amount[]

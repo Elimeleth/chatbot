@@ -1,3 +1,4 @@
+import { loader } from "../../helpers/loader";
 import { objectToString } from "../../helpers/util";
 import { httpClient } from "../../services/http";
 import { URL_PUNTOS } from "../../shared/constants/enviroments";
@@ -36,7 +37,7 @@ class Bp extends BaseCommand {
 }
 
 export const _bp = new Bp('biyuyo puntos')
-export const bp_pipe = _bp.pipe((msg, command) => {
+export const bp_pipe = _bp.pipe(async (msg, command) => {
     if (!command) return false
 
     command.form = { phone: msg.phone }
