@@ -1,7 +1,7 @@
 import { service_code, services } from "../../helpers/commands";
 import { loader } from "../../helpers/loader";
 import { build_form, parse_message_output } from "../../helpers/util";
-import { assert } from "../../lib/assertions";
+import { assert, assertKeysNotNullOrUndefined } from "../../lib/assertions";
 import { httpClient } from "../../services/http";
 import { PATH_FILE_SERVICES_AMOUNTS, URL_PAGAR } from "../../shared/constants/enviroments";
 import { EXPRESSION_PATTERN } from "../../shared/constants/patterns";
@@ -110,8 +110,10 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         }
         
         command.form.service_code = service?.service_code
-        
-        assert(!command.form, loader("HOW_PAYMENT"))
+        console.log({
+            form: command.form,
+        })
+        assert(!!Object.keys(command.form).length, loader("HOW_PAYMENT"))
         assert(command.captureCommand !== 'raspar' && !command.form.gif_code, loader("HOW_SCRAPE"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
         // assert(command.form.service_code && !!(!command.form.amount && !service?.pin), loader("HOW_PAYMENT"))
@@ -163,6 +165,7 @@ export const pay_capture = _pay.pipe(async (_, command) => {
     const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service
 
     try {
+        assert(!!service)
         assert(!command.error_message, command.error_message)
         if (service.validate_amount && amount_list && command.form.amount) {
 
