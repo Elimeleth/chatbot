@@ -111,6 +111,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         
         command.form.service_code = service?.service_code
         
+        assert(!command.form, loader("HOW_PAYMENT"))
         assert(command.captureCommand !== 'raspar' && !command.form.gif_code, loader("HOW_SCRAPE"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
         // assert(command.form.service_code && !!(!command.form.amount && !service?.pin), loader("HOW_PAYMENT"))
@@ -148,7 +149,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
             react: WARNING_REACTION
         }))
 
-        // command.error_message = message
+        command.error_message = message
         // @ts-ignore
         // await command.deliveryMessage()
     }
