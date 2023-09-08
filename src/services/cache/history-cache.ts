@@ -32,31 +32,15 @@ class Cache {
     private existHistory (username: string, message: string) {
         const user = this.users.get(username) as CacheHistory
         return !!(
-            user &&
-            !!(
             user.last_message === message &&
             distanceIntoDates(Number(user.last_timestamp), Date.now(), 'seconds') < Number(loader("ANTISPAM_EVALUATE_SECONDS", PATH_CONFIGURATIONS))
             )
-        )
     }
 
     antispam (username: string, message: string, isMe: boolean = false) {
         if (!this.users.has(username)) return false
     
-        const user = this.users.get(username)
-        const diff = distanceIntoDates(Number(user.last_timestamp_bot), Date.now(), 'seconds')
-        console.log({user, diff})
-        let spam = false
-       
-        if (isMe) {
-            if (user.last_message_bot === message && diff < Number(loader("ANTISPAM_EVALUATE_SECONDS", PATH_CONFIGURATIONS))) {
-                spam = true
-            }
-        }else {
-            spam = this.existHistory(username, message)
-        }
-
-        return spam
+        return this.existHistory(username, message)
     }
 
     save(payload: Partial<CacheHistory>) {
