@@ -37,8 +37,9 @@ export const URL_DEPOSIT_EVENT = URL_API+String(process.env.URL_DEPOSIT_EVENT)
 export const URL_MENSAJE_EVENT = URL_API+String(process.env.URL_MENSAJE_EVENT)
 export const URL_NOTICIA_EVENT = URL_API+String(process.env.URL_NOTICIA_EVENT)
 
-
 // * ====================================================
+
+export const URL_ACTIVE_PROMOTIONS = URL_API+String(process.env.URL_ACTIVE_PROMOTIONS)
 
 // [FILES]
 export const PATH_CONFIGURATIONS = process.env.FILE_CONFIGURATIONS

@@ -113,10 +113,7 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
         command.action.url = queries.includes('service_code')
             ? URL_SALDO_OPERATOR + objectToString(command.form)
             : command.action.url += queries
-            console.log({
-                url: command.action.url,
-                form: command.form
-            })
+            
         command.form = null
         command.call = _balance.call
 

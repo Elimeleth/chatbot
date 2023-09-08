@@ -30,7 +30,7 @@ export type Command = {
     user_extra_intent?: string|null;
     default_message?: string|null; // MENSAJE POR DEFECTO
     error_message?: string|undefined; // MENSAJE DE ERROR
-    MessageSendOptions?: MessageSendOptions; // PARA FUTURAS VALIDACIONES
+    MessageSendOptions?: MessageSendOptions & { path_media?: string }; // PARA FUTURAS VALIDACIONES
     fallbacks?: any[];
     call: () => Promise<APIResponse|null>;
     deliveryMessage?: (wait_message: string|undefined) => Promise<void>;
@@ -76,12 +76,18 @@ export abstract class BaseChatService {
     get bot_name () { return this.name; }
     set bot_name (name: string) { this.name = name;}
 
+    abstract get version (): Promise<string>
+    abstract get _client (): any
+    abstract get _isConnected (): boolean
+
     abstract daemon (): this
     abstract listen (): Promise<any>
     abstract attachEvents (events: {
         name: string;
         cb: any
     }[]): void
+    abstract sendContact (...args: any[]): void
+    abstract sendMedia (...args: any[]): void
     abstract cron (schedule: any, cb: any): void
     abstract status(status: 'seen'|'typing'|'stop', chatId: string): Promise<void>
     abstract send(to: string, message: MessageContent, options?: MessageSendOptions): Promise<any>

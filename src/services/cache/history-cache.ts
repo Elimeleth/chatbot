@@ -29,27 +29,31 @@ class Cache {
         })
     }
 
-    existHistory (username: string, data: Partial<CacheHistory>) {
+    private existHistory (username: string, message: string) {
         const user = this.users.get(username) as CacheHistory
         return !!(
             user &&
             !!(
-            user.message_id === data.message_id ||
-            user.last_message === data.last_message ||
-            user.last_timestamp === data.last_timestamp
+            user.last_message === message &&
+            distanceIntoDates(Number(user.last_timestamp), Date.now(), 'seconds') < Number(loader("ANTISPAM_EVALUATE_SECONDS", PATH_CONFIGURATIONS))
             )
         )
     }
 
-    antispam (username: string, last_message_bot: string) {
+    antispam (username: string, message: string, isMe: boolean = false) {
         if (!this.users.has(username)) return false
     
         const user = this.users.get(username)
         const diff = distanceIntoDates(Number(user.last_timestamp_bot), Date.now(), 'seconds')
 
         let spam = false
-        if (user.last_message_bot === last_message_bot && diff < Number(loader("ANTISPAM_EVALUATE_SECONDS", PATH_CONFIGURATIONS))) {
-            spam = true
+       
+        if (isMe) {
+            if (user.last_message_bot === message && diff < Number(loader("ANTISPAM_EVALUATE_SECONDS", PATH_CONFIGURATIONS))) {
+                spam = true
+            }
+        }else {
+            spam = this.existHistory(username, message)
         }
 
         return spam

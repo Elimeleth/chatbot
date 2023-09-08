@@ -29,7 +29,5 @@ export const message_create = {
 }
 
 export const unread_count = {}
-
 export const message_revoke_everyone = {}
-
 export const message_revoke_me = {}

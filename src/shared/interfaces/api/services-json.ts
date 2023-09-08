@@ -8,6 +8,7 @@ export type Service = {
   maintenance: boolean;
   pin: boolean;
   hasTemplate: boolean;
+  path_media: string|undefined;
   validate_amount: boolean;
   hasConsultFromOperator: boolean;
   hasConsutlFromAmountList: boolean;

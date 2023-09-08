@@ -154,15 +154,19 @@ export class ChatFactory<T> implements BaseChat<T> {
     }
 
     async call(input: string, event: Message & { extra: string[], phone: string, client: Client, error_message?: string }) {
-        const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(e => {
-            this.service.send(event.from, loader("SUPPORT"), {
-                quotedMessageId: event.id._serialized
-            })
-            this.service.sendContact(event.from, loader("SUPPORT_CONTACT", PATH_CONFIGURATIONS), {
-                quotedMessageId: event.id._serialized,
-                parseVCards: true
-            })
+        if (cache.antispam(event.from, input)) return this.service.send(event.from, loader("BOT_ERROR_CACHE_DUPLICATE"), {
+            quotedMessageId: event.id._serialized
+        });
+        
+        this.history.save({
+            last_message: input,
+            last_timestamp: Date.now(),
+            message_id: event.id.id,
+            username: event.from
+        })
 
+        const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(e => {
+            this.supportVcard(event)
             return { command: null, intent: null }
         }) as { command: Command, intent: RegExpMatchArray | null }
         
@@ -171,78 +175,13 @@ export class ChatFactory<T> implements BaseChat<T> {
         command.captureCommand = extra
 
         command.deliveryMessage = async (wait_message: string|undefined) => {
-            command.MessageSendOptions ||= {}
-            command.MessageSendOptions = {
-                ...command.MessageSendOptions,
-                quotedMessageId: event.id._serialized
-            }
-
-            await event.react(WAITING_REACTION)
-            if (wait_message) {
-                await this.service.send(event.from, wait_message, command.MessageSendOptions)
-            }
-
-            let retrieve: APIResponse | null = {
-                message: '',
-                status_response: STATUS_RESPONSE_FAILED,
-                react: WARNING_REACTION
-            }
-
-            const cached = this.history.existHistory(event.from, {
-                last_message: input,
-                message_id: event.id.id,
-                last_timestamp: event.timestamp
-            })
-
-            if (!cached){
-                retrieve.message = loader("BOT_ERROR_CACHE_DUPLICATE")
-                try {
-
-                    if (command.action.method !== 'GET' && command.form) {
-                        command.action.data = buildFormData(command.form)
-                    }
-    
-                    // @ts-ignore
-                    assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
-                    
-                    retrieve = await command.call() as unknown as APIResponse
-                    assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
-                    console.log({ retrieve })
-                } catch (e: any) {
-                    retrieve = {
-                        message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("BOT_ERROR_FLOW"),
-                        status_response: STATUS_RESPONSE_FAILED,
-                        react: WARNING_REACTION
-                    }
-    
-                    command.invalid_data = []
-                }
-            }
-            
-            command.MessageSendOptions.linkPreview = !!(retrieve.message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
-            command.action.data = null
-
-            await event.react(retrieve.react || FAST_REACTION)
-            if (!retrieve.message) return;
-            if (cache.antispam(event.from, retrieve.message)) return;
-
-            this.service.send(event.from, retrieve.message, command.MessageSendOptions)
-
-            this.history.save({
-                last_message: input,
-                last_timestamp: Date.now(),
-                message_id: event.id.id,
-                username: event.from
-            })
-
-
+            await this.delivery({ input, command, event, wait_message })
         }
 
         event.extra = event.body.replace(new RegExp(extra, 'gim'), '').trim().split(' ').filter((word) => Boolean(word))
 
         event.phone = event.from.split("@")[0]
 
-        // event.client = this.service.client
 
         command.fallbacks?.map(async fallback => {
             try {
@@ -250,6 +189,72 @@ export class ChatFactory<T> implements BaseChat<T> {
             } catch (e: any) {
                 await fallback(null, null, new Error(e.message))
             }
+        })
+    }
+
+    private supportVcard (event: any) {
+        this.service.sendContact(event.from, loader("SUPPORT"), loader("SUPPORT_CONTACT", PATH_CONFIGURATIONS), {
+            quotedMessageId: event.id._serialized
+        })
+   }
+
+    private async delivery (args: any) {
+        const { input, command, event, wait_message } = args
+
+        command.MessageSendOptions ||= {}
+        command.MessageSendOptions = {
+            ...command.MessageSendOptions,
+            quotedMessageId: event.id._serialized,
+            media: undefined,
+            caption: undefined,
+        }
+
+        await event.react(WAITING_REACTION)
+        if (wait_message) {
+            await this.service.send(event.from, wait_message, command.MessageSendOptions)
+        }
+
+        let retrieve: APIResponse | null = {
+            message: '',
+            status_response: STATUS_RESPONSE_FAILED,
+            react: WARNING_REACTION
+        }
+        
+        try {
+
+            if (command.action.method !== 'GET' && command.form) {
+                command.action.data = buildFormData(command.form)
+            }
+
+            // @ts-ignore
+            assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
+            
+            retrieve = await command.call() as unknown as APIResponse
+            assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
+            console.log({ retrieve })
+        } catch (e: any) {
+            retrieve = {
+                message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("BOT_ERROR_FLOW"),
+                status_response: STATUS_RESPONSE_FAILED,
+                react: WARNING_REACTION
+            }
+
+            command.invalid_data = []
+        }
+        
+        command.MessageSendOptions.linkPreview = !!(retrieve.message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
+
+        command.action.data = null
+        if (cache.antispam(event.from, input, true)) return;
+        if (!retrieve.message) return;
+
+        await event.react(retrieve.react || FAST_REACTION)
+
+        this.service.send(event.from, retrieve.message, command.MessageSendOptions)
+
+        this.history.save({
+            last_message_bot: retrieve.message as string,
+            last_timestamp_bot: Date.now(),
         })
     }
 

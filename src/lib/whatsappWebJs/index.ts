@@ -6,6 +6,9 @@ import { assert } from "../assertions";
 import * as job from "node-cron"
 import { CentinelWhatsAppWeb } from "./centinel";
 import { cache } from "../../services/cache/history-cache";
+import { httpClient } from "../../services/http";
+import { PATH_CONFIGURATIONS, URL_ACTIVE_PROMOTIONS } from "../../shared/constants/enviroments";
+import { loader } from "../../helpers/loader";
 
 
 export class WhatsAppWebService extends BaseChatService {
@@ -90,30 +93,44 @@ export class WhatsAppWebService extends BaseChatService {
         })(_status)
     }
     
-    async sendContact (phone: string, contactId: string, messageSendOptions: MessageSendOptions | undefined) {
+    async sendContact (phone: string, message: string, contactId: string, messageSendOptions: MessageSendOptions | undefined = {}) {
         const contact = await this.client.getContactById(contactId)
-        return this.send(phone, contact, messageSendOptions)
+        this.send(phone, message, messageSendOptions)
+        this.send(phone, contact, messageSendOptions)
     }
 
-    async sendMedia (phone: string, pathFileMedia: string, messageSendOptions: MessageSendOptions | undefined) {
+    async sendMedia (phone: string, pathFileMedia: string, messageSendOptions: MessageSendOptions | undefined = {}) {
         const media = MessageMedia.fromFilePath(pathFileMedia)
         return this.send(phone, media, messageSendOptions)
     }
 
-    async send(to: string, message: MessageContent, messageSendOptions: MessageSendOptions | undefined) {
+    async send(to: string, message: MessageContent, messageSendOptions: MessageSendOptions | undefined = {}) {
         assert(to.includes("@c.us"), "to must include @c.us")
-        if (typeof message === 'string' && cache.antispam(to, message)) return;
         
-        cache.save({
-            last_message_bot: message as string,
-            last_timestamp_bot: Date.now(),
-            username: to
-        })
-
-        await delay(900)
+        await delay(150)
         await this.client.sendPresenceAvailable()
         await this.status('typing', to)
-        await delay(900)
+
+        // @ts-ignore
+        if (messageSendOptions?.path_media) {
+            // @ts-ignore
+            messageSendOptions.media =  MessageMedia.fromFilePath(messageSendOptions.path_media)
+            messageSendOptions.caption = message as string
+
+            // @ts-ignore
+            delete messageSendOptions.path_media
+        }else {
+            const isPromotionable = await httpClient({
+                url: URL_ACTIVE_PROMOTIONS,
+                method: 'GET'
+            })
+    
+            if (isPromotionable.send_image_promotion) {
+                messageSendOptions.media =  MessageMedia.fromFilePath(loader("PATH_PROMOTION_AVAILABLE", PATH_CONFIGURATIONS))
+                messageSendOptions.caption = message as string
+            }
+        }
+        
 
         const ack = this.client.sendMessage(to, message, {
             sendSeen: true,

@@ -59,10 +59,18 @@ export const pin_pipe = _pin.pipe(async (msg, command) => {
       
     try {  
         assert(Boolean(code), loader("BOT_ERROR_CONSULT_PIN_AMOUNT_NOT_PIN_FOUND"))
+
         command.form = { service_code: code.service_code, phone: msg.phone }
         const queries = objectToString(command.form)
         command.action.url += queries
-        command.call = _pin.call
+        command.call = async () => await new Promise(async (resolve, reject) => {
+            if (code.name.match(/netflix/gim)) {
+                command.MessageSendOptions = { 
+                    path_media: code.path_media
+                }
+            }
+            resolve(await httpClient(command.action))
+        })
 
         // @ts-ignore
         await command.deliveryMessage(loader("WAIT_CONSULT_PIN"))
