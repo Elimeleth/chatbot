@@ -19,7 +19,6 @@ const unreads = async (client: Client) => {
 
 		return chats.filter(filterChat)
 	} catch (error) {
-		console.log(error)
 		return []
 	}
 };
@@ -61,9 +60,6 @@ export class CentinelWhatsAppWeb<T>  {
 			if (this.centinel.includes(msg.id.id)) return
 			else this.centinel.push(msg.id.id)
 
-			console.log({
-				msg
-			})
 			if ((msg?._data?.type === 'ciphertext' && msg?._data?.subtype === "fanout") && (msg.type !== 'chat' && !msg.body)) {
 				msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
 				await this.chat.call('error', msg)

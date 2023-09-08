@@ -11,6 +11,7 @@ import { cache } from "../../services/cache/history-cache";
 export class WhatsAppWebService extends BaseChatService {
     private client!: Client
     private chat!: PipeChat
+    private isConnected = false
 
     constructor(bot_name: string) {
         super(bot_name)
@@ -23,6 +24,10 @@ export class WhatsAppWebService extends BaseChatService {
 
     get _client () {
         return this.client
+    }
+
+    get _isConnected () {
+        return this.isConnected
     }
 
     private init () {
@@ -38,6 +43,7 @@ export class WhatsAppWebService extends BaseChatService {
         console.log(`*** USING WHATSAPP WEB VERSION ${await this.version} ***`)
         const centinel = new CentinelWhatsAppWeb(this.chat as any)
         this.cron(centinel.schedule, async () => await centinel.task())
+        this.isConnected = true
         return service
     }
 

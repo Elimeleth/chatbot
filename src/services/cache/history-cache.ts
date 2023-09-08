@@ -47,7 +47,6 @@ class Cache {
         const user = this.users.get(username)
         const diff = distanceIntoDates(Number(user.last_timestamp_bot), Date.now(), 'seconds')
 
-        console.log('antispam', user.last_message_bot === last_message_bot, diff)
         let spam = false
         if (user.last_message_bot === last_message_bot && diff < Number(loader("ANTISPAM_EVALUATE_SECONDS", PATH_CONFIGURATIONS))) {
             spam = true

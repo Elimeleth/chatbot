@@ -49,55 +49,49 @@ class Pay extends BaseCommand {
 export const _pay = new Pay('pagar')
 export const pay_pipe = _pay.pipe(async (msg, command) => {
     if (!msg || !command) return false
-    if ((msg && !msg.extra.length)) {
-        command.call = async () => {
-            return {
-                message: loader("HOW_PAYMENT"),
-                status_response: STATUS_RESPONSE_FAILED
-            }
-        }
 
-        return null;
-    }
-    command.form = { phone: msg.phone }
-
-    const services_codes = (values: string[]) => {
-        let service = values.join(' ').match(EXPRESSION_PATTERN.SERVICE_CODE)?.toString() as string
-        service = service ? service.trim() : service
-        if (service && services.some(code => code.names.includes(service.toUpperCase()))) {
-            msg.extra = msg.extra.filter(e => !service.split(' ').includes(e))
-            return services.find(code => code.names.includes(service.toUpperCase()))?.service_code as string
-        }
-
-        return ''
-    }
-
-    const { extra, form } = build_form(
-        command.form || {},
-        [
-            {
-                name: 'service_code',
-                condition_return_value: services_codes,
-                condition: param => !!(param.match(EXPRESSION_PATTERN.SERVICE_CODE)),
-            },
-            {
-                name: 'contract_number',
-                condition: (param) => !!(param.match(EXPRESSION_PATTERN.NUMBER_CONTRACT) && param.length >= 4)
-            },
-            {
-                name: 'gif_code',
-                condition: (param) => !!(param.match(EXPRESSION_PATTERN.GIFT_CODE))
-            },
-            {
-                name: 'amount',
-                condition: (param) => !!(param.match(EXPRESSION_PATTERN.SERVICE_AMOUNT))
-            },
-
-        ],
-        msg.extra
-    )
-    command.form = form
     try {
+        if ((msg && !msg.extra.length)) {
+            assert(false, loader("HOW_PAYMENT"))
+        }
+        command.form = { phone: msg.phone }
+
+        const services_codes = (values: string[]) => {
+            let service = values.join(' ').match(EXPRESSION_PATTERN.SERVICE_CODE)?.toString() as string
+            service = service ? service.trim() : service
+            if (service && services.some(code => code.names.includes(service.toUpperCase()))) {
+                msg.extra = msg.extra.filter(e => !service.split(' ').includes(e))
+                return services.find(code => code.names.includes(service.toUpperCase()))?.service_code as string
+            }
+
+            return ''
+        }
+
+        const { extra, form } = build_form(
+            command.form || {},
+            [
+                {
+                    name: 'service_code',
+                    condition_return_value: services_codes,
+                    condition: param => !!(param.match(EXPRESSION_PATTERN.SERVICE_CODE)),
+                },
+                {
+                    name: 'contract_number',
+                    condition: (param) => !!(param.match(EXPRESSION_PATTERN.NUMBER_CONTRACT) && param.length >= 4)
+                },
+                {
+                    name: 'gif_code',
+                    condition: (param) => !!(param.match(EXPRESSION_PATTERN.GIFT_CODE))
+                },
+                {
+                    name: 'amount',
+                    condition: (param) => !!(param.match(EXPRESSION_PATTERN.SERVICE_AMOUNT))
+                },
+
+            ],
+            msg.extra
+        )
+        command.form = form
         let service: Service | null = null
 
         if (command.form.service_code) {
@@ -108,11 +102,9 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
                 command.form.contract_number.match(new RegExp(code.code, 'gim'))
             ))
         }
-        
+
         command.form.service_code = service?.service_code
-        console.log({
-            form: command.form,
-        })
+        
         assert(!!Object.keys(command.form).length, loader("HOW_PAYMENT"))
         assert(command.captureCommand !== 'raspar' && !command.form.gif_code, loader("HOW_SCRAPE"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
@@ -138,13 +130,13 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
                 value: String(command.form.gif_code)
             }
         ]).replace(/BOT:/gim, '').trim()
-        
+
         command.call = _pay.call
         // @ts-ignore
         await command.deliveryMessage(message)
         command.error_message = ''
     } catch (e: any) {
-        const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*`}]).replace(/BOT:/gim, '').trim()
+        const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*` }]).replace(/BOT:/gim, '').trim()
         command.call = async () => await new Promise((resolve) => resolve({
             message,
             status_response: STATUS_RESPONSE_FAILED,
@@ -159,25 +151,24 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
 
 export const pay_capture = _pay.pipe(async (_, command) => {
     if (!command) return false
-    
+
     const amounts = loader(null, PATH_FILE_SERVICES_AMOUNTS) as Amount[]
     const amount_list = amounts.find(amount => amount.code === command.form.service_code) as Amount
-    const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service
-
     try {
-        assert(!!service)
         assert(!command.error_message, command.error_message)
+        const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service
+
+        assert(!!service)
         if (service.validate_amount && amount_list && command.form.amount) {
 
             const { max, min, multiple } = amount_list.amounts
             const amount_service = command.form.amount.replace(/,/gm, '.')
-            
+
             assert((Number(amount_service) > Number(min)), loader("BOT_ERROR_PAYMENT_MIN_AMOUNT"))
             assert((Number(amount_service) < Number(max)), loader("BOT_ERROR_PAYMENT_MAX_AMOUNT"))
             assert((Number(amount_service) % Number(multiple) === 0), loader("BOT_ERROR_PAYMENT_MULTIPLE_AMOUNT"))
         }
     } catch (error: any) {
-        console.log(error)
         let message = parse_message_output(error.message, [
             {
                 key: '[SERVICE]',

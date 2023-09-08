@@ -1,4 +1,5 @@
 export const EXPRESSION_PATTERN = {
+    LINK_PREVIEW_VIDEOS: /(http|https):\/\/youtu([\w.-]+)(:\d+)?(\/[\w .-]*)*/,
     LINK_PREVIEW: /(http|https):\/\/([\w.-]+)(:\d+)?(\/[\w .-]*)*([\w@?^=%&\/~+-]*)?/gim,
     REFERENCE_CODE: /[^\D]/gm,
     ACTIVE_CODE: /[0-9]*/g,

@@ -7,7 +7,7 @@ import { BaseCommand } from "../../shared/interfaces/commands";
 class ExtraTutorial extends BaseCommand {
     private command: Command = {
         key: "otros comandos",
-        intents: ['otros comandos', 'mas', '+'],
+        intents: ['otros comandos', 'mas', 'extra', 'otros'],
         action: {
             url: "",
             method: "",

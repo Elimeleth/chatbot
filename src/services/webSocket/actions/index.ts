@@ -1,3 +1,4 @@
+import { serviceWhatsApp } from "../../../lib/whatsappWebJs"
 import { event_amounts, event_banks, event_deposit, event_group, event_groups, event_notice, event_ticket, event_tracking, event_wppconnect_server } from "./actions"
 
 const ACTIONS: any = {
@@ -14,5 +15,7 @@ const ACTIONS: any = {
 }
 
 export const action = (type: string, data: any) => {
+    if (!serviceWhatsApp._isConnected) return
+        
     return ACTIONS[type](data)
 }

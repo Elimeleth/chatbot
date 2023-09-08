@@ -154,9 +154,14 @@ export class ChatFactory<T> implements BaseChat<T> {
 
     async call(input: string, event: Message & { extra: string[], phone: string, client: Client, error_message?: string }) {
         const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(e => {
+            console.log({
+                commande: e
+            })
             return { command: null, intent: null }
         }) as { command: Command, intent: RegExpMatchArray | null }
-
+        console.log({
+            command
+        })
         if (!command) return
         const extra = intent ? intent[0] : ''
         command.captureCommand = extra
@@ -193,6 +198,9 @@ export class ChatFactory<T> implements BaseChat<T> {
                     assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
                     console.log({ retrieve })
                 } catch (e: any) {
+                    console.log({
+                        e1: e
+                    })
                     retrieve = {
                         message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("BOT_ERROR_FLOW"),
                         status_response: STATUS_RESPONSE_FAILED,
@@ -239,6 +247,9 @@ export class ChatFactory<T> implements BaseChat<T> {
             try {
                 await fallback(event, command)
             } catch (e: any) {
+                console.log({
+                    fallback_error: e
+                })
                 await fallback(null, null, new Error(e.message))
             }
         })

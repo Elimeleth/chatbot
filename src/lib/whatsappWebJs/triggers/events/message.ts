@@ -16,7 +16,7 @@ export const message = {
     name: 'message',
     cb: async (msg: Message, chat: PipeChat|null) => {
         if (filterMessage(msg)) return false;
-        
+        logger.info({ info: 'message_create', msg })
         if (chat) chat.call(msg.body, msg)
     }
 }
