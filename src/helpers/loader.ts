@@ -16,7 +16,6 @@ const loadJson = (filename: string) => {
     return load(json_data) as any
     
   } catch (error) {
-   
     return null
   }
 }

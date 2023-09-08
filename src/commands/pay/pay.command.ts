@@ -154,6 +154,7 @@ export const pay_capture = _pay.pipe(async (_, command) => {
 
     const amounts = loader(null, PATH_FILE_SERVICES_AMOUNTS) as Amount[]
     const amount_list = amounts.find(amount => amount.code === command.form.service_code) as Amount
+   
     try {
         assert(!command.error_message, command.error_message)
         const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service

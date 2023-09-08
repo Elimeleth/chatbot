@@ -2,7 +2,7 @@ import { config } from "dotenv";
 config()
 
 export const NODE_ENV = process.env.NODE_ENV
-export const EVENT = process.env.NODE_ENV === "production" ? 'PRODUCTION' : 'TEST'
+export const EVENT = process.env.NODE_ENV === "production" ? 'production' : 'test'
 
 // *=================================================
 export const URL_LOCALDB = process.env.URL_LOCALDB

@@ -1,4 +1,4 @@
-import { Client, MessageContent, MessageSendOptions } from "whatsapp-web.js";
+import { Client, MessageContent, MessageMedia, MessageSendOptions } from "whatsapp-web.js";
 import { BaseChatService, PipeChat } from "../../shared/interfaces/chat";
 import { CLIENT_OPTIONS } from "../../shared/constants/whatsapp-web";
 import { delay } from "../delay";
@@ -89,7 +89,16 @@ export class WhatsAppWebService extends BaseChatService {
             }
         })(_status)
     }
-       
+    
+    async sendContact (phone: string, contactId: string, messageSendOptions: MessageSendOptions | undefined) {
+        const contact = await this.client.getContactById(contactId)
+        return this.send(phone, contact, messageSendOptions)
+    }
+
+    async sendMedia (phone: string, pathFileMedia: string, messageSendOptions: MessageSendOptions | undefined) {
+        const media = MessageMedia.fromFilePath(pathFileMedia)
+        return this.send(phone, media, messageSendOptions)
+    }
 
     async send(to: string, message: MessageContent, messageSendOptions: MessageSendOptions | undefined) {
         assert(to.includes("@c.us"), "to must include @c.us")

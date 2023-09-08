@@ -36,9 +36,10 @@ export const event_deposit = async (deposits: {
         const formdata = formData({ deposit_id, type });
 
 
-        await fetch(URL_DEPOSIT_EVENT, {
+        await httpClient({
+            url: URL_DEPOSIT_EVENT,
             method: 'POST',
-            body: formdata
+            data: formdata
         })
 
         logger.info({
@@ -80,41 +81,41 @@ export const event_message = async (msgs: {
         const match_url_finded = !!message.match(EXPRESSION_PATTERN.LINK_PREVIEW_VIDEOS)
 
         phone = Array.isArray(phone) ? phone : [phone] // * EVALUAMOS QUE SEA ARRAY
+        phone = phone.filter(p => p.length > 5)
         const linkPreview = link || true; //* EVALUACION DE LINK PREVIEW EN ENLACES EXTERNOS
 
         logger.info({ info: 'message_event', msgs });
 
-        phone.forEach(async (p: string) => {
-            console.log('sending preview...')
-            if (p) {
-                try {
-                    if (match_url_finded && !match_attention_vcard && Boolean(Number(loader("USE_XCLIENT_TO_PREVIEW", PATH_CONFIGURATIONS)))) {
-                        const preview = await sendPrevieWithXClient(message, p)
+        for (const p of phone) {
+            try {
+                if (match_url_finded && !match_attention_vcard && Boolean(Number(loader("USE_XCLIENT_TO_PREVIEW", PATH_CONFIGURATIONS)))) {
+                    const preview = await sendPrevieWithXClient(message, p)
 
-                        if (!preview || !preview.message || !preview?.message?.match(/Evento emitido/gim)) {
-                            throw new Error("not preview send")
-                        }
-                    } else {
-                        await serviceWhatsApp.send(`${p}@c.us`, message, { linkPreview });
+                    if (!preview || !preview.message || !preview?.message?.match(/Evento emitido/gim)) {
+                        throw new Error("not preview send")
                     }
-                } catch (_) {
+                } else {
                     await serviceWhatsApp.send(`${p}@c.us`, message, { linkPreview });
                 }
-
-                if (scheduled_notifications_id) {
-                    const { form: formdata } = formData({ scheduled_notifications_id, type });
-
-                    await fetch(URL_MENSAJE_EVENT, {
-                        method: 'PUT',
-                        body: formdata
-                    })
-                }
+            } catch (_) {
+                await serviceWhatsApp.send(`${p}@c.us`, message, { linkPreview });
             }
+
+            if (scheduled_notifications_id) {
+                const { form: formdata } = formData({ scheduled_notifications_id, type });
+
+                await httpClient({
+                    url: URL_MENSAJE_EVENT, 
+                    method: 'PUT',
+                    data: formdata
+                })
+            }
+
             logger.info({
                 info: 'event_message_created',
                 msgs
             })
-        })
+        }
 
 
     } catch (error: any) {
@@ -130,7 +131,11 @@ export const event_banks = async (banks: any) => {
         banks
     })
     try {
-        fs.writeFileSync(PATH_BANKS as string, banks, 'utf-8')
+        fs.writeFileSync(PATH_BANKS as string, JSON.parse(banks), {
+            encoding: 'utf-8',
+            flag: "w",
+            mode: 0o666,
+          })
     } catch (_) { }
 };
 
@@ -151,7 +156,11 @@ export const event_amounts = async (amounts: any) => {
         amounts
     })
     try {
-        fs.writeFileSync(PATH_FILE_SERVICES_AMOUNTS as string, amounts, 'utf-8')
+        fs.writeFileSync(PATH_FILE_SERVICES_AMOUNTS as string, JSON.parse(amounts), {
+            encoding: 'utf-8',
+            flag: "w",
+            mode: 0o666,
+          })
     } catch (_) { }
 }
 export const event_groups = async (groups: any) => {

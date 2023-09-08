@@ -117,10 +117,7 @@ export const deposit_capture = _deposit.pipe(async (msg, command) => {
 
     const banks = loader(null, PATH_BANKS) as Bank[]
     const bank = command.form.bank_account_application
-    console.log({
-        url: command.action.url,
-        form: command.form
-    })
+    
     if (banks.find((bnk) => bnk.code === bank)?.hasPm) {
         localDB.create({
             username: command.form.phone,
