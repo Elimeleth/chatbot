@@ -106,7 +106,7 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         command.form.service_code = service?.service_code
         
         assert(!!Object.keys(command.form).length, loader("HOW_PAYMENT"))
-        assert(command.captureCommand !== 'raspar' && !command.form.gif_code, loader("HOW_SCRAPE"))
+        assert(command.captureCommand === 'raspar' && command.form.gif_code, loader("HOW_SCRAPE"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
         // assert(command.form.service_code && !!(!command.form.amount && !service?.pin), loader("HOW_PAYMENT"))
         assert(command.form.contract_number || !!(service?.recharge && !command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))

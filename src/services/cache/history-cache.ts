@@ -45,7 +45,7 @@ class Cache {
     
         const user = this.users.get(username)
         const diff = distanceIntoDates(Number(user.last_timestamp_bot), Date.now(), 'seconds')
-
+        console.log({user, diff})
         let spam = false
        
         if (isMe) {

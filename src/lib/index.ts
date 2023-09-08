@@ -199,7 +199,7 @@ export class ChatFactory<T> implements BaseChat<T> {
    }
 
     private async delivery (args: any) {
-        const { input, command, event, wait_message } = args
+        const { command, event, wait_message } = args
 
         command.MessageSendOptions ||= {}
         command.MessageSendOptions = {
@@ -245,7 +245,6 @@ export class ChatFactory<T> implements BaseChat<T> {
         command.MessageSendOptions.linkPreview = !!(retrieve.message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
 
         command.action.data = null
-        if (cache.antispam(event.from, input, true)) return;
         if (!retrieve.message) return;
 
         await event.react(retrieve.react || FAST_REACTION)
@@ -255,6 +254,7 @@ export class ChatFactory<T> implements BaseChat<T> {
         this.history.save({
             last_message_bot: retrieve.message as string,
             last_timestamp_bot: Date.now(),
+            username: event.from
         })
     }
 
