@@ -4,6 +4,7 @@ import { loader } from "../../../helpers/loader";
 import { PATH_CONFIGURATIONS } from "../../../shared/constants/enviroments";
 import { WhatsAppWebService } from "..";
 import { ChatFactory } from "../..";
+import { logger } from "../../../services/logs/winston.log";
 // import { user_cache } from "./user_cache";
 /**
  * 
@@ -17,7 +18,9 @@ const unreads = async (client: Client) => {
 
 		if (!chats.length) return []
 
-		return chats.filter(filterChat)
+		const _unreads = chats.filter(filterChat)
+		logger.info({ info: 'unreads chats', count: _unreads.length })
+		return _unreads
 	} catch (error) {
 		return []
 	}
@@ -60,6 +63,7 @@ export class CentinelWhatsAppWeb<T>  {
 			if (this.centinel.includes(msg.id.id)) return
 			else this.centinel.push(msg.id.id)
 
+			logger.info({ info: 'get_chats', msg })
 			if ((msg?._data?.type === 'ciphertext' && msg?._data?.subtype === "fanout") && (msg.type !== 'chat' && !msg.body)) {
 				msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
 				await this.chat.call('error', msg)

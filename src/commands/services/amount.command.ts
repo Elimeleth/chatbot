@@ -73,11 +73,16 @@ export const service_amount_pipe = _serviceAmount.pipe(async (msg, command) => {
             status_response: STATUS_RESPONSE_SUCCES,
             react: INFO_REACTION
         }))
+
+        //@ts-ignore
+        await command.deliveryMessage()
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
             message: e.message.replace(/BOT:/gim, '').trim(),
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
+        //@ts-ignore
+        await command.deliveryMessage()
     }
 })

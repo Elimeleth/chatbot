@@ -61,7 +61,10 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
 
             const services_codes = (values: string[]) => {
                 for (const value of values) {
-                    if (services.some(service => service.names.includes(value.toUpperCase()))) {
+                    if (services.some(service => !!(
+                        service.names.includes(value.toUpperCase()) ||
+                        value.match(new RegExp(service.code, 'gm'))
+                    ))) {
                         msg.extra = msg.extra.filter(e => e !== value)
                         return services.find(code => !!(
                             code.names.includes(value.toUpperCase()) ||
@@ -96,13 +99,11 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
             command.form = form
 
 
-            console.log({
-                form: command.form
-            })
+            
             const service = service_code((code) => code.service_code === command.form.service_code) as Service
             assertKeysNotNullOrUndefined(command.form, ['service_code', 'gift_code'], true)
             assert(!command.form.gift_code && findKeyOrFail(command.form, ['service_code', 'contract_number']), loader("BOT_ERROR_NOT_SERVICE_OR_CONTRACT"))
-            assert(service.recharge && !command.form.contract_number.match(new RegExp(service.code, 'gim')), loader("BOT_ERROR_MOVIL_NOT_MATCH"))
+            assert(service.recharge && command.form.contract_number.match(new RegExp(service.code, 'gim')), loader("BOT_ERROR_MOVIL_NOT_MATCH"))
             assert(command.form.service_code && service.hasConsultFromOperator)
 
             command.invalid_data = extra.filter(e => msg.extra.includes(e))
@@ -112,7 +113,10 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
         command.action.url = queries.includes('service_code')
             ? URL_SALDO_OPERATOR + objectToString(command.form)
             : command.action.url += queries
-
+            console.log({
+                url: command.action.url,
+                form: command.form
+            })
         command.form = null
         command.call = _balance.call
 
