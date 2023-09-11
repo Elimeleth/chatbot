@@ -53,7 +53,6 @@ class ServiceAmount extends BaseCommand {
 
 export const _serviceAmount = new ServiceAmount('montos')
 export const service_amount_pipe = _serviceAmount.pipe(async (msg, command) => {
-    if (!command) return false
     
     const [svc, ...rest] = msg.body.split(' ')
     const amounts = loader(null, PATH_FILE_SERVICES_AMOUNTS) as Amount[]
@@ -78,7 +77,7 @@ export const service_amount_pipe = _serviceAmount.pipe(async (msg, command) => {
         await command.deliveryMessage()
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
-            message: e.message.replace(/BOT:/gim, '').trim(),
+            message: e.message,
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))

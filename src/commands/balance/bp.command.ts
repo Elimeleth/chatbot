@@ -38,7 +38,6 @@ class Bp extends BaseCommand {
 
 export const _bp = new Bp('biyuyo puntos')
 export const bp_pipe = _bp.pipe(async (msg, command) => {
-    if (!command) return false
 
     command.form = { phone: msg.phone }
     command.call = _bp.call

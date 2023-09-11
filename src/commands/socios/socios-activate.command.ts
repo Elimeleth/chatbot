@@ -36,8 +36,6 @@ export class SociosActivate extends BaseCommand {
 }
 export const _activate_socios = new SociosActivate('activar socios');
 export const activate_socios_pipe = _activate_socios.pipe(async (msg, command) => {
-    if (!command) return false
-
     command.form = { phone: msg.phone, type: ACTIVATE_SOCIOS }
     command.action.url += objectToString(command.form)
     command.call = _activate_socios.call

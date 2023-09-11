@@ -1,5 +1,5 @@
 import { BehaviorSubject } from "rxjs";
-import { Action, BaseChat, BaseChatService, Callback, Command, api_response } from "../shared/interfaces/chat";
+import { BaseChat, BaseChatService, Callback, Command, api_response } from "../shared/interfaces/chat";
 import { assert, assertArray } from "./assertions";
 import { BaseCommand } from "../shared/interfaces/commands";
 import { Client, Message } from "whatsapp-web.js";
@@ -144,7 +144,7 @@ export class ChatFactory<T> implements BaseChat<T> {
         return this
     }
 
-    addActionToCommand(key: string, action: Action) {
+    addActionToCommand(key: string, action: any) {
         const command = this.findKeyOrFail(key) as Command
 
         command.action = action
@@ -187,7 +187,7 @@ export class ChatFactory<T> implements BaseChat<T> {
             try {
                 await fallback(event, command)
             } catch (e: any) {
-                await fallback(null, null, new Error(e.message))
+                // await fallback(null, null, new Error(e.message))
             }
         })
     }
@@ -233,8 +233,11 @@ export class ChatFactory<T> implements BaseChat<T> {
             assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
             console.log({ retrieve })
         } catch (e: any) {
+            console.log({
+                lib: e
+            })
             retrieve = {
-                message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("BOT_ERROR_FLOW"),
+                message: String(e.message).match(/BOT:/gim) ? e.message : loader("BOT_ERROR_FLOW"),
                 status_response: STATUS_RESPONSE_FAILED,
                 react: WARNING_REACTION
             }
@@ -245,10 +248,11 @@ export class ChatFactory<T> implements BaseChat<T> {
         command.MessageSendOptions.linkPreview = !!(retrieve.message.match(EXPRESSION_PATTERN.LINK_PREVIEW))
 
         command.action.data = null
+        
         if (!retrieve.message) return;
 
         await event.react(retrieve.react || FAST_REACTION)
-
+        retrieve.message = retrieve.message.replace(/BOT:/gim, '').trim()
         this.service.send(event.from, retrieve.message, command.MessageSendOptions)
 
         this.history.save({

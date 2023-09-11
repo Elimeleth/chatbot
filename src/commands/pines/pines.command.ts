@@ -51,7 +51,6 @@ class Pins extends BaseCommand {
 
 export const _pin = new Pins('pin')
 export const pin_pipe = _pin.pipe(async (msg, command) => {
-    if (!command) return false
     const [svc, ...rest] = msg.body.split(' ')
     const code = service_code(code => 
         code.names.includes(svc.toUpperCase()) || 
@@ -77,7 +76,7 @@ export const pin_pipe = _pin.pipe(async (msg, command) => {
         
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
-            message: e.message.replace(/BOT:/gim, '').trim(),
+            message: e.message,
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))

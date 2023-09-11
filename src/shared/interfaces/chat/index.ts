@@ -29,6 +29,7 @@ export type Command = {
     intents: string[]; // ARRAY DE INTENTS
     user_extra_intent?: string|null;
     default_message?: string|null; // MENSAJE POR DEFECTO
+    last_message_delivery?: string|null;
     error_message?: string|undefined; // MENSAJE DE ERROR
     MessageSendOptions?: MessageSendOptions & { path_media?: string }; // PARA FUTURAS VALIDACIONES
     fallbacks?: any[];
@@ -44,16 +45,15 @@ export type Command = {
     action: AxiosRequestConfig // ACCION A REALIZAR
 }
 
-export type Action = {
-    name: string; // NOMBRE DE LA ACCION
-    url: string; // URL A LA CUAL SE LE PEGARA
-    method: string; // TIPO DE REQUEST O VERB REQUEST
-    data?: any,
-    // validate_value_return?: boolean; // VALIDA EL VALOR RETORNADO POR LA REQUEST
-    // return_default?: string; // DECIDE SI RETORNA EL VALOR POR DEFECTO
+export type ExtraMessage = { 
+    extra: string[], 
+    phone: string, 
+    client: Client, 
+    error_message?: string 
 }
 
-export type Callback<T> = (message: Message  & { extra: string[], phone: string, client: Client, error_message?: string }, ctx?: Command, err?: Error|unknown) => T;                                                                   
+
+export type Callback<T> = (message: Message  & ExtraMessage, ctx: Command, next: () => any) => T;                                                                   
 
 
 export interface PipeChat {

@@ -128,6 +128,9 @@ export class WhatsAppWebService extends BaseChatService {
             if (isPromotionable.send_image_promotion) {
                 messageSendOptions.media =  MessageMedia.fromFilePath(loader("PATH_PROMOTION_AVAILABLE", PATH_CONFIGURATIONS))
                 messageSendOptions.caption = message as string
+            }else {
+                messageSendOptions.media = undefined
+                messageSendOptions.caption = undefined
             }
         }
         

@@ -37,8 +37,6 @@ class Referred extends BaseCommand {
 
 export const _referred = new Referred('referido')
 export const referred_pipe = _referred.pipe(async (msg, command) => {
-    if (!command) return false
-
     command.form = { phone: msg.phone }
     command.action.url += objectToString(command.form)
     command.call = _referred.call

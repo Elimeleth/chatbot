@@ -39,7 +39,6 @@ class ActivateBp extends BaseCommand {
 
 export const _activateBp = new ActivateBp('activar puntos')
 export const activateBp_pipe = _activateBp.pipe(async (msg, command) => {
-    if (!command) return false
 
     command.form = { phone: msg.phone, type: ACTIVATE_POINTS }
 

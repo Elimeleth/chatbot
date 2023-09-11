@@ -38,8 +38,6 @@ class ErrorCommand extends BaseCommand {
 
 export const _error = new ErrorCommand('error')
 export const error_pipe = _error.pipe(async (msg, command) => {
-    if (!msg || !command) return
-
     command.call = async () => await new Promise((resolve, reject) => {
         return resolve({
             message: msg.error_message as string,

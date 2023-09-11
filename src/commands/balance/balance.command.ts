@@ -44,7 +44,6 @@ class Balance extends BaseCommand {
 
 export const _balance = new Balance('saldo')
 export const balance_pipe = _balance.pipe(async (msg, command) => {
-    if (!msg || !command) return false
     // * PARAMETROS A PARSEAR
     // * SERVICE CODE
     // * CONTRACT NUMBER
@@ -121,7 +120,7 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
         await command.deliveryMessage(loader("WAIT_CONSULT"))
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
-            message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("CONSULT"),
+            message: String(e.message).startsWith('BOT:') ? e.message : loader("CONSULT"),
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))

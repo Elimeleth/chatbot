@@ -38,8 +38,6 @@ class DepositRegister extends BaseCommand {
 
 export const _depositRegister = new DepositRegister('registrar deposito')
 export const deposit_register_pipe = _depositRegister.pipe(async (msg, command) => {
-    if (!msg || !command) return false
-    
     const deposit = await localDB.findOne(msg.phone)
 
     if (!deposit) command.call = async () => await new Promise((resolve, _) => {

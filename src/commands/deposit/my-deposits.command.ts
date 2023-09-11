@@ -37,8 +37,6 @@ class MyDeposits extends BaseCommand {
 
 export const _myDeposits = new MyDeposits('mis depositos')
 export const my_deposits_pipe = _myDeposits.pipe(async (msg, command) => {
-    if (!command) return false
-
     command.form = { phone: msg.phone }
 
     command.action.url += objectToString(command.form)

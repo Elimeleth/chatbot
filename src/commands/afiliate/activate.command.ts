@@ -39,8 +39,6 @@ class AfiliateActivate extends BaseCommand {
 
 export const _activate_afiliate = new AfiliateActivate('activar')
 export const activate_afiliate_pipe = _activate_afiliate.pipe(async (msg, command) => {
-    if (!command) return false
-
     const { extra, form } = build_form(
         command.form || {},
         [

@@ -43,7 +43,6 @@ class Deposit extends BaseCommand {
 
 export const _deposit = new Deposit('depositar')
 export const deposit_pipe = _deposit.pipe(async (msg, command) => {
-    if (!msg || !command) return false
     try {
         if ((msg && !msg.extra.length)) {
             assert(false, loader("HOW_DEPOSIT"))
@@ -95,7 +94,7 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
 
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
-            message: String(e.message).startsWith('BOT:') ? e.message.replace(/BOT:/gim, '').trim() : loader("HOW_DEPOSIT"),
+            message: String(e.message).startsWith('BOT:') ? e.message : loader("HOW_DEPOSIT"),
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
@@ -108,7 +107,6 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
 })
 
 export const deposit_capture = _deposit.pipe(async (msg, command) => {
-    if (!command) return false
     if (command.error_message) {
         command.error_message = ''
         return false

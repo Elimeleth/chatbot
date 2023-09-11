@@ -47,8 +47,7 @@ class Pay extends BaseCommand {
 }
 
 export const _pay = new Pay('pagar')
-export const pay_pipe = _pay.pipe(async (msg, command) => {
-    if (!msg || !command) return false
+export const pay_pipe = _pay.pipe(async (msg, command, next) => {
 
     try {
         if ((msg && !msg.extra.length)) {
@@ -135,13 +134,14 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
         // @ts-ignore
         await command.deliveryMessage(message)
         command.error_message = ''
+        next()
     } catch (e: any) {
         const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*` }]).replace(/BOT:/gim, '').trim()
-        command.call = async () => await new Promise((resolve) => resolve({
-            message,
-            status_response: STATUS_RESPONSE_FAILED,
-            react: WARNING_REACTION
-        }))
+        // command.call = async () => await new Promise((resolve) => resolve({
+        //     message,
+        //     status_response: STATUS_RESPONSE_FAILED,
+        //     react: WARNING_REACTION
+        // }))
 
         command.error_message = message
         // @ts-ignore
@@ -150,12 +150,14 @@ export const pay_pipe = _pay.pipe(async (msg, command) => {
 })
 
 export const pay_capture = _pay.pipe(async (_, command) => {
-    if (!command) return false
 
     const amounts = loader(null, PATH_FILE_SERVICES_AMOUNTS) as Amount[]
     const amount_list = amounts.find(amount => amount.code === command.form.service_code) as Amount
    
     try {
+        console.log({
+            command
+        })
         assert(!command.error_message, command.error_message)
         const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service
 

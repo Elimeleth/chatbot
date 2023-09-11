@@ -37,8 +37,6 @@ class MyPayments extends BaseCommand {
 
 export const _myPayments = new MyPayments('mis pagos')
 export const my_payments_pipe = _myPayments.pipe(async (msg, command) => {
-    if (!command) return false
-
     command.form = { phone: msg.phone }
 
     command.action.url += objectToString(command.form)
