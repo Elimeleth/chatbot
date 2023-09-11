@@ -47,6 +47,7 @@ export type ExtraMessage = {
     extra: string[], 
     phone: string, 
     client: Client, 
+    haveTicketSupport: boolean,
     error_message?: string 
     invalid_data?: string[];
 }

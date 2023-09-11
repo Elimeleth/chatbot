@@ -11,6 +11,13 @@ type Multimedia = {
 }
 class TicketSupport {
 
+    haveTicket (phone: string) {
+        const ticket: { phone: string, status: string}[] = loader(null, PATH_TICKET_SUPPORT) || []
+
+        if (!ticket.length) return false
+        return !!(ticket.some(t => t.phone === phone ))
+    }
+
     private async download_file(multimedia: Multimedia) {
         const media_data_response = await httpClient({
             url: URL_GNFILES,

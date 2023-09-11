@@ -1,5 +1,5 @@
 import { BehaviorSubject } from "rxjs";
-import { BaseChat, BaseChatService, Callback, Command, api_response } from "../shared/interfaces/chat";
+import { BaseChat, BaseChatService, Callback, Command, ExtraMessage, api_response } from "../shared/interfaces/chat";
 import { assert, assertArray } from "./assertions";
 import { BaseCommand } from "../shared/interfaces/commands";
 import { Client, Message } from "whatsapp-web.js";
@@ -154,8 +154,15 @@ export class ChatFactory<T> implements BaseChat<T> {
         return this
     }
 
-    async call(input: string, event: Message & { extra: string[], phone: string, client: Client, error_message?: string }) {
+    async call(input: string, event: Message & ExtraMessage) {
         
+        if (event.haveTicketSupport) {
+            await create_ticket_support.create({
+                phone: event.from.split("@")[0],
+                message: event.body
+            })
+        }
+
         if (cache.antispam(event.from, input)) return this.service.send(event.from, loader("BOT_ERROR_CACHE_DUPLICATE"), {
             quotedMessageId: event.id._serialized
         });

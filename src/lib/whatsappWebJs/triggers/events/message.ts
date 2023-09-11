@@ -18,6 +18,8 @@ export const message = {
     cb: async (msg: Message, chat: PipeChat|null) => {
         if (filterMessage(msg)) return false;
         logger.info({ info: 'message_create', msg })
+        // @ts-ignore
+        msg.haveTicketSupport = create_ticket_support.haveTicket(msg.from.split("@")[0])
         if (chat) chat.call(msg.body, msg)
     }
 }
