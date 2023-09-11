@@ -107,10 +107,14 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
         if (command.captureCommand === 'raspar' && !command.form.gift_code) {
             assert(false, loader("HOW_SCRAPE"))
         }
+
+        if (!Boolean(service?.pin) && !command.form.amount) {
+            assert(false, loader("HOW_PAYMENT"))
+        }
         
         assert(!!Object.keys(command.form).length, loader("HOW_PAYMENT"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
-        // assert(command.form.service_code && !!(!command.form.amount && !service?.pin), loader("HOW_PAYMENT"))
+        
         assert(command.form.contract_number || !!(service?.recharge && !command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
 
         msg.invalid_data = extra.filter(e => msg.extra.includes(e))
@@ -156,7 +160,7 @@ export const pay_capture = _pay.pipe(async (_, command) => {
                 value: `${service?.name}`
             }, {
                 key: '[AMOUNT]',
-                value: `${command.form.amount ? command.form.amount + ' Bs.' : 'el *monto mínimo* del servicio'}`
+                value: `${command.form.amount ? command.form.amount + ' Bs.' : 'el monto mínimo del servicio'}`
             }, {
                 key: '[CONTRACT_NUMBER]',
                 value: String(command.form.contract_number)
