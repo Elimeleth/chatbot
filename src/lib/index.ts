@@ -158,7 +158,7 @@ export class ChatFactory<T> implements BaseChat<T> {
         
         if (event.haveTicketSupport) {
             await create_ticket_support.create({
-                phone: event.from.split("@")[0],
+                phone: event.phone,
                 message: event.body
             })
         }
@@ -196,8 +196,6 @@ export class ChatFactory<T> implements BaseChat<T> {
         }
 
         event.extra = event.body.replace(new RegExp(extra, 'gim'), '').trim().split(' ').filter((word) => Boolean(word))
-
-        event.phone = event.from.split("@")[0]
 
         await (new Chain(command.fallbacks || [], [event, command])).invoque()
     }

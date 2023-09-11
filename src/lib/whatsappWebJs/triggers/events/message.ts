@@ -19,7 +19,9 @@ export const message = {
         if (filterMessage(msg)) return false;
         logger.info({ info: 'message_create', msg })
         // @ts-ignore
-        msg.haveTicketSupport = create_ticket_support.haveTicket(msg.from.split("@")[0])
+        msg.phone = msg.from.split("@")[0]
+        // @ts-ignore
+        msg.haveTicketSupport = create_ticket_support.haveTicket(msg.phone)
         if (chat) chat.call(msg.body, msg)
     }
 }

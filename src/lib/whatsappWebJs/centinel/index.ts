@@ -6,6 +6,7 @@ import { WhatsAppWebService } from "..";
 import { ChatFactory } from "../..";
 import { logger } from "../../../services/logs/winston.log";
 import { cache } from "../../../services/cache/history-cache";
+import { delay } from "../../delay";
 // import { user_cache } from "./user_cache";
 /**
  * 
@@ -58,14 +59,33 @@ export class CentinelWhatsAppWeb<T>  {
 
 	async task() {
 		const chats = await unreads(this.chat.client)
-
+		
 		if (chats.length > 0) {
 			logger.info({ info: 'unreads chats', count: chats.length })
-
+			delay(500)
 			for (const chat of chats) {
 				const msg = await fetch_messages(chat) as any
-				if (this.centinel.includes(msg.id.id)) continue
+				console.log(msg.body, msg.id)
+				delay(500)
+				if (!this.centinel.includes(msg.id.id)) {
+					if ((msg?._data?.type === 'ciphertext' && msg?._data?.subtype === "fanout") && (msg.type !== 'chat' && !msg.body)) {
+						msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
+						await this.chat.call('error', msg)
+					}
+					if (msg?._data?.type === 'ciphertext' && (msg.type !== 'chat' && !msg.body)) {
+						msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
+						await this.chat.call('error', msg)
+					}
+					if (msg.body.match(/(pagar|raspar|recargar|gift_card|tarjeta)/gim)) {
+						msg.error_message = loader("BOT_GET_CHAT_PAYMENT_MESSAGE")
+						await this.chat.call('error', msg)
+					}
+					else {
+						await this.chat.call(msg.body, msg)
+					}
+				}
 				else this.centinel.push(msg.id.id)
+
 				logger.info({ info: 'get_chats', msg })
 
 				cache.save({
@@ -74,21 +94,7 @@ export class CentinelWhatsAppWeb<T>  {
 					last_timestamp: undefined
 				})
 				
-				if ((msg?._data?.type === 'ciphertext' && msg?._data?.subtype === "fanout") && (msg.type !== 'chat' && !msg.body)) {
-					msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
-					await this.chat.call('error', msg)
-				}
-				if (msg?._data?.type === 'ciphertext' && (msg.type !== 'chat' && !msg.body)) {
-					msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
-					await this.chat.call('error', msg)
-				}
-				if (msg.body.match(/(pagar|raspar|recargar|gift_card|tarjeta)/gim)) {
-					msg.error_message = loader("BOT_GET_CHAT_PAYMENT_MESSAGE")
-					await this.chat.call('error', msg)
-				}
-				else {
-					await this.chat.call(msg.body, msg)
-				}
+				
 			}
 		}
 
