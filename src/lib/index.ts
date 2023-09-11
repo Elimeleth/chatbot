@@ -220,15 +220,12 @@ export class ChatFactory<T> implements BaseChat<T> {
             }
 
             // @ts-ignore
-            assert(msg.invalid_data && !msg.invalid_data.length, loader("INVALID_DATA") + ` *${msg.invalid_data ? msg.invalid_data.join(',') : ''}*`)
+            assert(!event.invalid_data?.length, loader("INVALID_DATA") + ` *${event.invalid_data ? event.invalid_data.join(',') : ''}*`)
             
             retrieve = await command.call() as unknown as APIResponse
             assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
             console.log({ retrieve })
         } catch (e: any) {
-            console.log({
-                lib: e
-            })
             retrieve = {
                 message: String(e.message).match(/BOT:/gim) ? e.message : loader("BOT_ERROR_FLOW"),
                 status_response: STATUS_RESPONSE_FAILED,

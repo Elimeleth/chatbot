@@ -105,7 +105,7 @@ export const deposit_pipe = _deposit.pipe(async (msg, command, next) => {
     }
 })
 
-export const deposit_capture = _deposit.pipe(async (msg, command) => {
+export const deposit_capture = _deposit.pipe(async (_, command) => {
     const banks = loader(null, PATH_BANKS) as Bank[]
     const bank = command.form.bank_account_application
     

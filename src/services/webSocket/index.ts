@@ -62,10 +62,6 @@ export const connect_websocket: any = (): void => {
      */
     
     connection.on(EVENT, async(data : any, type: any) => {
-        console.log({
-            data_event: data,
-            type
-        })
         return action(type, data)
     });
 };

@@ -103,9 +103,12 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
         }
 
         command.form.service_code = service?.service_code
+
+        if (command.captureCommand === 'raspar' && !command.form.gift_code) {
+            assert(false, loader("HOW_SCRAPE"))
+        }
         
         assert(!!Object.keys(command.form).length, loader("HOW_PAYMENT"))
-        assert(command.captureCommand === 'raspar' && command.form.gift_code, loader("HOW_SCRAPE"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
         // assert(command.form.service_code && !!(!command.form.amount && !service?.pin), loader("HOW_PAYMENT"))
         assert(command.form.contract_number || !!(service?.recharge && !command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
@@ -140,10 +143,7 @@ export const pay_capture = _pay.pipe(async (_, command) => {
 
             const { max, min, multiple } = amount_list.amounts
             const amount_service = command.form.amount.replace(/,/gm, '.')
-            console.log({
-                amount_service,
-                max: Number(amount_service) < Number(max), min: Number(amount_service) > Number(min), multiple: Number(amount_service) % Number(multiple) === 0
-            })
+            
             assert((Number(amount_service) >= Number(min)), loader("BOT_ERROR_PAYMENT_MIN_AMOUNT"))
             assert((Number(amount_service) <= Number(max)), loader("BOT_ERROR_PAYMENT_MAX_AMOUNT"))
             assert((Number(amount_service) % Number(multiple) === 0), loader("BOT_ERROR_PAYMENT_MULTIPLE_AMOUNT"))
