@@ -5,6 +5,7 @@ export const NODE_ENV = process.env.NODE_ENV
 export const EVENT = process.env.NODE_ENV === "production" ? 'production' : 'test'
 
 // *=================================================
+export const URL_GNFILES = process.env.URL_GNFILES as string
 export const URL_LOCALDB = process.env.URL_LOCALDB
 export const URL_SOCKET = process.env.URL_SOCKET as string
 // * ==============================================================
@@ -45,5 +46,6 @@ export const URL_ACTIVE_PROMOTIONS = URL_API+String(process.env.URL_ACTIVE_PROMO
 export const PATH_CONFIGURATIONS = process.env.FILE_CONFIGURATIONS
 export const PATH_USER_HISTORY = process.env.FILE_USER_HISTORY
 export const PATH_BANKS = process.env.FILE_BANKS
+export const PATH_TICKET_SUPPORT = process.env.FILE_TICKET_SUPPORT
 export const PATH_FILE_SERVICES_CODES = process.env.FILE_SERVICES_CODES
 export const PATH_FILE_SERVICES_AMOUNTS = process.env.FILE_SERVICES_AMOUNTS

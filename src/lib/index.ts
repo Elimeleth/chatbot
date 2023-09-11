@@ -13,6 +13,7 @@ import { EXPRESSION_PATTERN } from "../shared/constants/patterns";
 import { cache } from "../services/cache/history-cache";
 import { PATH_CONFIGURATIONS } from "../shared/constants/enviroments";
 import { Chain } from "../services/chain";
+import { create_ticket_support } from "../services/ticket";
 
 export class ChatFactory<T> implements BaseChat<T> {
     private commands: Command[] = [];
@@ -154,6 +155,7 @@ export class ChatFactory<T> implements BaseChat<T> {
     }
 
     async call(input: string, event: Message & { extra: string[], phone: string, client: Client, error_message?: string }) {
+        
         if (cache.antispam(event.from, input)) return this.service.send(event.from, loader("BOT_ERROR_CACHE_DUPLICATE"), {
             quotedMessageId: event.id._serialized
         });
@@ -165,7 +167,15 @@ export class ChatFactory<T> implements BaseChat<T> {
             username: event.from
         })
 
-        const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(e => {
+        const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(async _ => {
+            const user = this.history.user(event.from)
+            
+            if (user)  this.history.save({
+                            ...user,
+                            error_count: user.error_count + 1
+                        })
+            if (user && user.error_count >= 3) await create_ticket_support.create({ phone: event.from.split('@')[0], message: event.body })
+           
             this.supportVcard(event)
             return { command: null, intent: null }
         }) as { command: Command, intent: RegExpMatchArray | null }

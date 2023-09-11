@@ -15,6 +15,7 @@ export type CacheHistory = {
     prev_message_bot?: string|null;
     prev_timestamp_bot?: string|number;
     cached?: boolean;
+    error_count?: number;
     // history: [string, string][]
 }
 

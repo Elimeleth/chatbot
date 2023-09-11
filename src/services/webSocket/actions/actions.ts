@@ -1,7 +1,7 @@
 import { loader } from "../../../helpers/loader";
 import { formData, sendPrevieWithXClient } from "../../../helpers/util";
 import { serviceWhatsApp } from "../../../lib/whatsappWebJs";
-import { PATH_BANKS, PATH_CONFIGURATIONS, PATH_FILE_SERVICES_AMOUNTS, URL_DEPOSIT_EVENT, URL_MENSAJE_EVENT } from "../../../shared/constants/enviroments";
+import { PATH_BANKS, PATH_CONFIGURATIONS, PATH_FILE_SERVICES_AMOUNTS, PATH_TICKET_SUPPORT, URL_DEPOSIT_EVENT, URL_MENSAJE_EVENT } from "../../../shared/constants/enviroments";
 import { EXPRESSION_PATTERN } from "../../../shared/constants/patterns";
 import { httpClient } from "../../http";
 import { logger } from "../../logs/winston.log";
@@ -160,7 +160,7 @@ export const event_amounts = async (amounts: any) => {
             encoding: 'utf-8',
             flag: "w",
             mode: 0o666,
-          })
+        })
     } catch (_) { }
 }
 export const event_groups = async (groups: any) => {
@@ -168,11 +168,28 @@ export const event_groups = async (groups: any) => {
 }
 
 export const event_ticket = async (ticket: any) => {
-    logger.info({
-        info: 'ticket_file_created',
-        ticket
-    })
-    throw new Error('Method not implemented')
+    try {
+        if (!ticket.phone || !ticket.status) return null
+        
+        let tickets = loader(null, PATH_TICKET_SUPPORT) || []
+        
+        if (tickets.length) {
+            if (tickets.some((t: any) => t.phone === ticket.phone && ticket.status.match(/close/gim))) {
+                tickets = tickets.filter((t: any) => t.phone !== ticket.phone)
+            }
+        }
+
+        fs.writeFileSync(PATH_TICKET_SUPPORT as string, JSON.stringify(tickets), {
+            encoding: 'utf-8',
+            flag: "w",
+            mode: 0o666,
+        })
+
+        logger.info({
+            info: 'ticket_file_created',
+            ticket
+        })
+    } catch (_) { }
 }
 
 export const event_wppconnect_server = async (healthy: any) => {

@@ -16,6 +16,10 @@ class Cache {
         return loader(null, PATH_USER_HISTORY) as CacheHistory[];
     }
 
+    user (username: string) {
+        return this.users.get(username) || null
+    }
+
     private task () {
         job.schedule('* * * * *', () => {
             if (!this.users.size) return
@@ -54,10 +58,12 @@ class Cache {
             payload.prev_message_bot = user.last_message_bot
             payload.prev_timestamp_bot = user.last_timestamp_bot
             payload.prev_timestamp = user.last_timestamp
-
+            
             payload = Object.assign(user, payload)
+            
+        }else {
+            payload.error_count = 0
         }
-        
         this.users.set(payload.username as string, payload)
         // history = history.filter(hst => hst.username !== payload.username)
         // history.push(payload)

@@ -1,6 +1,7 @@
 import { Message } from "whatsapp-web.js";
 import { PipeChat } from "../../../../shared/interfaces/chat";
 import { logger } from "../../../../services/logs/winston.log";
+import { create_ticket_support } from "../../../../services/ticket";
 
 const filterMessage = (msg: Message): boolean => !!(
     msg.fromMe ||
@@ -25,6 +26,18 @@ export const message_create = {
     name: 'message_create',
     cb: async (msg: Message) => {
         if (msg.fromMe) return false;
+        if (msg.hasMedia) {
+            
+            const multimedia = {
+                id: msg.id._serialized,
+                ...(await msg.downloadMedia())
+            }
+
+            await create_ticket_support.create({
+                phone: msg.from.split('@')[0],
+                message: '(Contiene multimedia)'
+            }, multimedia)
+        }
     }
 }
 

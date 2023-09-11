@@ -5,6 +5,7 @@ import { PATH_CONFIGURATIONS } from "../../../shared/constants/enviroments";
 import { WhatsAppWebService } from "..";
 import { ChatFactory } from "../..";
 import { logger } from "../../../services/logs/winston.log";
+import { cache } from "../../../services/cache/history-cache";
 // import { user_cache } from "./user_cache";
 /**
  * 
@@ -30,6 +31,7 @@ const filterChat = (chat: Chat): boolean => {
 
 	return (
 		_isToday(chat.timestamp * 1000)
+		&& !Boolean(chat.lastMessage.type !== 'chat')
 		&& !chat.isGroup
 		&& !chat.id.user.includes('status')
 		&& !chat.lastMessage.fromMe
@@ -62,10 +64,16 @@ export class CentinelWhatsAppWeb<T>  {
 
 			for (const chat of chats) {
 				const msg = await fetch_messages(chat) as any
-				if (this.centinel.includes(msg.id.id)) return
+				if (this.centinel.includes(msg.id.id)) continue
 				else this.centinel.push(msg.id.id)
-
 				logger.info({ info: 'get_chats', msg })
+
+				cache.save({
+					username: msg.from,
+					last_message: undefined,
+					last_timestamp: undefined
+				})
+				
 				if ((msg?._data?.type === 'ciphertext' && msg?._data?.subtype === "fanout") && (msg.type !== 'chat' && !msg.body)) {
 					msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
 					await this.chat.call('error', msg)
