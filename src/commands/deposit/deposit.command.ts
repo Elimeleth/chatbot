@@ -42,7 +42,7 @@ class Deposit extends BaseCommand {
 }
 
 export const _deposit = new Deposit('depositar')
-export const deposit_pipe = _deposit.pipe(async (msg, command) => {
+export const deposit_pipe = _deposit.pipe(async (msg, command, next) => {
     try {
         if ((msg && !msg.extra.length)) {
             assert(false, loader("HOW_DEPOSIT"))
@@ -92,6 +92,7 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
 
         msg.invalid_data = extra.filter(e => msg.extra.includes(e))
 
+        next()
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
             message: String(e.message).startsWith('BOT:') ? e.message : loader("HOW_DEPOSIT"),
