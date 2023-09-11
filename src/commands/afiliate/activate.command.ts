@@ -14,7 +14,6 @@ class AfiliateActivate extends BaseCommand {
             url: URL_ACTIVAR,
             method: "POST",
         },
-        invalid_data: [],
         call: async () => await new Promise((resolve, reject) => resolve(null))
     }
 
@@ -52,7 +51,7 @@ export const activate_afiliate_pipe = _activate_afiliate.pipe(async (msg, comman
     command.form = form
     command.form.phone = msg.phone
 
-    command.invalid_data = extra
+    msg.invalid_data = extra
     
     command.call = _activate_afiliate.call
     // @ts-ignore

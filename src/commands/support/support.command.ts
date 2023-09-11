@@ -12,7 +12,6 @@ class Support extends BaseCommand {
             url: "",
             method: "",
         },
-        invalid_data: [],
         call: async () => await new Promise((resolve, reject) => resolve(null))
     }
 

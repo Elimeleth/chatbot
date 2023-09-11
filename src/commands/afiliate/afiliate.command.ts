@@ -14,7 +14,6 @@ class Afiliate extends BaseCommand {
             url: URL_AFILIAR,
             method: "POST",
         },
-        invalid_data: [],
         call: async () => await new Promise((resolve, reject) => resolve(null))
     }
 

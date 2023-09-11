@@ -105,7 +105,7 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
             assert(service.recharge && command.form.contract_number.match(new RegExp(service.code, 'gim')), loader("BOT_ERROR_MOVIL_NOT_MATCH"))
             assert(command.form.service_code && service.hasConsultFromOperator)
 
-            command.invalid_data = extra.filter(e => msg.extra.includes(e))
+            msg.invalid_data = extra.filter(e => msg.extra.includes(e))
         }
         const queries = objectToString(command.form)
 

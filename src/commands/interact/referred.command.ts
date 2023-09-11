@@ -12,7 +12,6 @@ class Referred extends BaseCommand {
             url: URL_REFERIDO,
             method: "GET",
         },
-        invalid_data: [],
         call: async () => await new Promise((resolve, reject) => resolve(null))
     }
 

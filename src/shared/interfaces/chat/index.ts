@@ -29,14 +29,11 @@ export type Command = {
     intents: string[]; // ARRAY DE INTENTS
     user_extra_intent?: string|null;
     default_message?: string|null; // MENSAJE POR DEFECTO
-    last_message_delivery?: string|null;
-    error_message?: string|undefined; // MENSAJE DE ERROR
     MessageSendOptions?: MessageSendOptions & { path_media?: string }; // PARA FUTURAS VALIDACIONES
     fallbacks?: any[];
     call: () => Promise<APIResponse|null>;
     deliveryMessage?: (wait_message: string|undefined) => Promise<void>;
     evaluate?: (posible_command: string) => boolean;
-    invalid_data?: string[];
     form?: any;
     captureCommand?: string|null;
     captureFunction?: any|undefined;
@@ -50,6 +47,7 @@ export type ExtraMessage = {
     phone: string, 
     client: Client, 
     error_message?: string 
+    invalid_data?: string[];
 }
 
 

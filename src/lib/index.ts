@@ -12,6 +12,7 @@ import { loader } from "../helpers/loader";
 import { EXPRESSION_PATTERN } from "../shared/constants/patterns";
 import { cache } from "../services/cache/history-cache";
 import { PATH_CONFIGURATIONS } from "../shared/constants/enviroments";
+import { Chain } from "../services/chain";
 
 export class ChatFactory<T> implements BaseChat<T> {
     private commands: Command[] = [];
@@ -116,7 +117,6 @@ export class ChatFactory<T> implements BaseChat<T> {
 
         if (keys.includes(command.key)) throw new Error(`Key: ${command.key} already exists`)
 
-        command.invalid_data = []
         command.form = {}
         command.action.data = {}
 
@@ -182,14 +182,7 @@ export class ChatFactory<T> implements BaseChat<T> {
 
         event.phone = event.from.split("@")[0]
 
-
-        command.fallbacks?.map(async fallback => {
-            try {
-                await fallback(event, command)
-            } catch (e: any) {
-                // await fallback(null, null, new Error(e.message))
-            }
-        })
+        await (new Chain(command.fallbacks || [], [event, command])).invoque()
     }
 
     private supportVcard (event: any) {
@@ -227,7 +220,7 @@ export class ChatFactory<T> implements BaseChat<T> {
             }
 
             // @ts-ignore
-            assert(command.invalid_data && !command.invalid_data.length, loader("INVALID_DATA") + ` *${command.invalid_data ? command.invalid_data.join(',') : ''}*`)
+            assert(msg.invalid_data && !msg.invalid_data.length, loader("INVALID_DATA") + ` *${msg.invalid_data ? msg.invalid_data.join(',') : ''}*`)
             
             retrieve = await command.call() as unknown as APIResponse
             assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
@@ -242,7 +235,7 @@ export class ChatFactory<T> implements BaseChat<T> {
                 react: WARNING_REACTION
             }
 
-            command.invalid_data = []
+            event.invalid_data = []
         }
         
         command.MessageSendOptions.linkPreview = !!(retrieve.message.match(EXPRESSION_PATTERN.LINK_PREVIEW))

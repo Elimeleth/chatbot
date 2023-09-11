@@ -90,7 +90,7 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
         assertKeysNotNullOrUndefined(command.form, ['bank_account_application', 'bank_reference', 'amount'])
         assert(banks.some(bank => bank.code === command.form.bank_account_application && bank.status === STATUS_BANK_AVAILABLE), loader("BOT_ERROR_BANK_UNAVAILABLE"))
 
-        command.invalid_data = extra.filter(e => msg.extra.includes(e))
+        msg.invalid_data = extra.filter(e => msg.extra.includes(e))
 
     } catch (e: any) {
         command.call = async () => await new Promise((resolve) => resolve({
@@ -98,8 +98,6 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
             status_response: STATUS_RESPONSE_FAILED,
             react: WARNING_REACTION
         }))
-        command.error_message = e.message
-
         // @ts-ignore
         await command.deliveryMessage()
 
@@ -107,12 +105,6 @@ export const deposit_pipe = _deposit.pipe(async (msg, command) => {
 })
 
 export const deposit_capture = _deposit.pipe(async (msg, command) => {
-    if (command.error_message) {
-        command.error_message = ''
-        return false
-    }
-
-
     const banks = loader(null, PATH_BANKS) as Bank[]
     const bank = command.form.bank_account_application
     

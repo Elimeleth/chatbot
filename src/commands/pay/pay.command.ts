@@ -79,7 +79,7 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
                     condition: (param) => !!(param.match(EXPRESSION_PATTERN.NUMBER_CONTRACT) && param.length >= 4)
                 },
                 {
-                    name: 'gif_code',
+                    name: 'gift_code',
                     condition: (param) => !!(param.match(EXPRESSION_PATTERN.GIFT_CODE))
                 },
                 {
@@ -105,14 +105,50 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
         command.form.service_code = service?.service_code
         
         assert(!!Object.keys(command.form).length, loader("HOW_PAYMENT"))
-        assert(command.captureCommand === 'raspar' && command.form.gif_code, loader("HOW_SCRAPE"))
+        assert(command.captureCommand === 'raspar' && command.form.gift_code, loader("HOW_SCRAPE"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
         // assert(command.form.service_code && !!(!command.form.amount && !service?.pin), loader("HOW_PAYMENT"))
         assert(command.form.contract_number || !!(service?.recharge && !command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
 
-        command.invalid_data = extra.filter(e => msg.extra.includes(e))
+        msg.invalid_data = extra.filter(e => msg.extra.includes(e))
 
-        const parse_message = command.form.gif_code ? loader("CONFIRMATION_PAYMENT_WITH_GIFTCARD") : loader("CONFIRMATION_PAYMENT")
+        command.call = _pay.call
+        next()
+    } catch (e: any) {
+        const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*` }]).replace(/BOT:/gim, '').trim()
+        command.call = async () => await new Promise((resolve) => resolve({
+            message,
+            status_response: STATUS_RESPONSE_FAILED,
+            react: WARNING_REACTION
+        }))
+
+        // @ts-ignore
+        await command.deliveryMessage()
+    }
+})
+
+export const pay_capture = _pay.pipe(async (_, command) => {
+
+    const amounts = loader(null, PATH_FILE_SERVICES_AMOUNTS) as Amount[]
+    const amount_list = amounts.find(amount => amount.code === command.form.service_code) as Amount
+   
+    try {
+        const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service
+
+        assert(!!service)
+        if (service.validate_amount && amount_list && command.form.amount) {
+
+            const { max, min, multiple } = amount_list.amounts
+            const amount_service = command.form.amount.replace(/,/gm, '.')
+            console.log({
+                amount_service,
+                max: Number(amount_service) < Number(max), min: Number(amount_service) > Number(min), multiple: Number(amount_service) % Number(multiple) === 0
+            })
+            assert((Number(amount_service) >= Number(min)), loader("BOT_ERROR_PAYMENT_MIN_AMOUNT"))
+            assert((Number(amount_service) <= Number(max)), loader("BOT_ERROR_PAYMENT_MAX_AMOUNT"))
+            assert((Number(amount_service) % Number(multiple) === 0), loader("BOT_ERROR_PAYMENT_MULTIPLE_AMOUNT"))
+        }
+        const parse_message = command.form.gift_code ? loader("CONFIRMATION_PAYMENT_WITH_GIFTCARD") : loader("CONFIRMATION_PAYMENT")
 
         let message = parse_message_output(parse_message, [
             {
@@ -126,51 +162,12 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
                 value: String(command.form.contract_number)
             }, {
                 key: '[GIFTCARD]',
-                value: String(command.form.gif_code)
+                value: String(command.form.gift_code)
             }
         ]).replace(/BOT:/gim, '').trim()
-
-        command.call = _pay.call
+        
         // @ts-ignore
         await command.deliveryMessage(message)
-        command.error_message = ''
-        next()
-    } catch (e: any) {
-        const message = parse_message_output(e.message, [{ key: '[CONTRACT_NUMBER]', value: `*${command.form?.contract_number}*` }]).replace(/BOT:/gim, '').trim()
-        // command.call = async () => await new Promise((resolve) => resolve({
-        //     message,
-        //     status_response: STATUS_RESPONSE_FAILED,
-        //     react: WARNING_REACTION
-        // }))
-
-        command.error_message = message
-        // @ts-ignore
-        // await command.deliveryMessage()
-    }
-})
-
-export const pay_capture = _pay.pipe(async (_, command) => {
-
-    const amounts = loader(null, PATH_FILE_SERVICES_AMOUNTS) as Amount[]
-    const amount_list = amounts.find(amount => amount.code === command.form.service_code) as Amount
-   
-    try {
-        console.log({
-            command
-        })
-        assert(!command.error_message, command.error_message)
-        const service = service_code((code: Service) => code.service_code === command.form.service_code) as Service
-
-        assert(!!service)
-        if (service.validate_amount && amount_list && command.form.amount) {
-
-            const { max, min, multiple } = amount_list.amounts
-            const amount_service = command.form.amount.replace(/,/gm, '.')
-
-            assert((Number(amount_service) > Number(min)), loader("BOT_ERROR_PAYMENT_MIN_AMOUNT"))
-            assert((Number(amount_service) < Number(max)), loader("BOT_ERROR_PAYMENT_MAX_AMOUNT"))
-            assert((Number(amount_service) % Number(multiple) === 0), loader("BOT_ERROR_PAYMENT_MULTIPLE_AMOUNT"))
-        }
     } catch (error: any) {
         let message = parse_message_output(error.message, [
             {
@@ -190,12 +187,12 @@ export const pay_capture = _pay.pipe(async (_, command) => {
 
         command.call = async () => await new Promise((resolve, _) => {
             resolve({
-                message: command.error_message || message,
+                message: message,
                 status_response: STATUS_RESPONSE_FAILED,
                 react: ERROR_INVALID_DATA_REACTION
             })
         })
-        command.error_message = ''
+        
         // @ts-ignore
         await command.deliveryMessage()
     }
