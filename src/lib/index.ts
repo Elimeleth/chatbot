@@ -60,10 +60,7 @@ export class ChatFactory<T> implements BaseChat<T> {
                 break
             }
         }
-        console.log({
-            commands,
-            command,
-        })
+        
         if (!command) throw new Error(`Key: (${possible_command}) not found`)
 
         command.user_extra_intent = keyOrIntent.replace(possible_command, '').trim()
@@ -182,9 +179,6 @@ export class ChatFactory<T> implements BaseChat<T> {
         })
 
         const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(async error => {
-            console.log({
-                command_error: error
-            })
             const user = this.history.user(event.from)
             
             if (user)  this.history.save({
@@ -271,16 +265,15 @@ export class ChatFactory<T> implements BaseChat<T> {
         await event.react(retrieve.react || FAST_REACTION)
         retrieve.message = retrieve.message.replace(/BOT:/gim, '').trim()
         
-        this.service.send(event.from, retrieve.message, command.MessageSendOptions)
+        const message_delivered = await this.service.send(event.from, retrieve.message, command.MessageSendOptions)
 
         event.action_bot_time = process.hrtime(event.action_bot_time)[0]
         
-
         logger.info({ info: 'message_delivered', from: event.from, times: {
             bot_time: event.action_bot_time,
             api_time: event.action_api_time,
             total: parseInt(String(Math.abs(event.action_bot_time - event.action_api_time)))
-        }, retrieve })
+        }, message_delivered })
 
         this.history.save({
             last_message_bot: retrieve.message as string,
