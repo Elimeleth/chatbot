@@ -14,6 +14,7 @@ import { cache } from "../services/cache/history-cache";
 import { PATH_CONFIGURATIONS } from "../shared/constants/enviroments";
 import { Chain } from "../services/chain";
 import { create_ticket_support } from "../services/ticket";
+import { logger } from "../services/logs/winston.log";
 
 export class ChatFactory<T> implements BaseChat<T> {
     private commands: Command[] = [];
@@ -54,12 +55,12 @@ export class ChatFactory<T> implements BaseChat<T> {
         let command = null
 
         for (const intent of commands) {
-            if (this.commands.some(c => c.intents.some(key => intent === key) || (c.evaluate && c.evaluate(intent)))) {
+            if (this.commands.some(c => c.intents.some(key => intent === key) || (c.evaluate && c.evaluate(possible_command)))) {
                 command = this.commands.find(c => c.intents.some(key => intent === key) || (c.evaluate && c.evaluate(intent)))
                 break
             }
         }
-
+        
         if (!command) throw new Error(`Key: (${possible_command}) not found`)
 
         command.user_extra_intent = keyOrIntent.replace(possible_command, '').trim()
@@ -241,6 +242,7 @@ export class ChatFactory<T> implements BaseChat<T> {
             assert(!event.invalid_data?.length, loader("INVALID_DATA") + ` *${event.invalid_data ? event.invalid_data.join(',') : ''}*`)
             
             retrieve = await command.call() as unknown as APIResponse
+            event.action_api_time = process.hrtime(event.action_api_time)[0]
             console.log({ retrieve })
             assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
             
@@ -262,7 +264,17 @@ export class ChatFactory<T> implements BaseChat<T> {
 
         await event.react(retrieve.react || FAST_REACTION)
         retrieve.message = retrieve.message.replace(/BOT:/gim, '').trim()
+        
         this.service.send(event.from, retrieve.message, command.MessageSendOptions)
+
+        event.action_bot_time = process.hrtime(event.action_bot_time)[0]
+        
+
+        logger.info({ info: 'message_delivered', from: event.from, times: {
+            bot_time: event.action_bot_time,
+            api_time: event.action_api_time,
+            total: parseInt(String(Math.abs(event.action_bot_time - event.action_api_time)))
+        }, retrieve })
 
         this.history.save({
             last_message_bot: retrieve.message as string,

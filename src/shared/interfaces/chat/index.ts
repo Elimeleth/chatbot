@@ -44,11 +44,13 @@ export type Command = {
 }
 
 export type ExtraMessage = { 
-    extra: string[], 
-    phone: string, 
-    client: Client, 
-    haveTicketSupport: boolean,
-    error_message?: string 
+    extra: string[]; 
+    phone: string; 
+    client: Client; 
+    action_bot_time: number;
+    action_api_time: number;
+    haveTicketSupport: boolean;
+    error_message?: string;
     invalid_data?: string[];
 }
 
