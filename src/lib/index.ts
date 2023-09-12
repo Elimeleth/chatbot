@@ -54,8 +54,8 @@ export class ChatFactory<T> implements BaseChat<T> {
         let command = null
 
         for (const intent of commands) {
-            if (this.commands.some(c => c.intents.some(key => intent === key))) {
-                command = this.commands.find(c => c.intents.some(key => intent === key))
+            if (this.commands.some(c => c.intents.some(key => intent === key) || (c.evaluate && c.evaluate(intent)))) {
+                command = this.commands.find(c => c.intents.some(key => intent === key) || (c.evaluate && c.evaluate(intent)))
                 break
             }
         }
@@ -245,7 +245,6 @@ export class ChatFactory<T> implements BaseChat<T> {
             assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
             
         } catch (e: any) {
-            console.log(e)
             retrieve = {
                 message: String(e.message).match(/BOT:/gim) ? e.message : loader("BOT_ERROR_FLOW"),
                 status_response: STATUS_RESPONSE_FAILED,

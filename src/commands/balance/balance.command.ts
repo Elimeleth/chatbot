@@ -14,7 +14,7 @@ import { service_code, services } from "../../helpers/commands";
 class Balance extends BaseCommand {
     private command: Command = {
         key: this._name,
-        intents: ['mi_saldo', 'consultar_saldo', 'consultar', 'bs', 'saldo', 'balance', 'dinero'],
+        intents: ['mi saldo', 'consultar', 'consulta', 'bs', 'saldo', 'balance', 'dinero'],
         action: {
             url: URL_SALDO,
             method: "GET"
@@ -106,6 +106,7 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
             assert(command.form.service_code && service.hasConsultFromOperator)
 
             msg.invalid_data = extra.filter(e => msg.extra.includes(e))
+            assert(!Boolean(msg.invalid_data.length), loader("CONSULT"))
         }
         const queries = objectToString(command.form)
 

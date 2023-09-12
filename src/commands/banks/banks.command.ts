@@ -9,7 +9,7 @@ import { BaseCommand } from "../../shared/interfaces/commands";
 class Banks extends BaseCommand {
     private command: Command = {
         key: "bancos",
-        intents: ['bancos'],
+        intents: ['bancos', 'cuentas'],
         action: {
             url: "",
             method: "",

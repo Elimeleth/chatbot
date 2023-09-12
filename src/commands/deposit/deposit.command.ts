@@ -14,7 +14,7 @@ import { localDB } from "../../services/localDB";
 class Deposit extends BaseCommand {
     private command: Command = {
         key: this._name,
-        intents: ['depositar'],
+        intents: ['depositar', 'registrar deposito'],
         action: {
             url: URL_DEPOSITAR,
             method: "POST"

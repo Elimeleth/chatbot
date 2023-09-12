@@ -69,16 +69,18 @@ export class CentinelWhatsAppWeb<T>  {
 			delay(500)
 			for (const chat of chats) {
 				const msg = await fetch_messages(chat) as any
-				console.log()
+				
 				delay(500)
 				if ((msg?._data?.type === 'ciphertext' && msg?._data?.subtype === "fanout") && (msg.type !== 'chat' && !msg.body)) {
 					msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
 					await this.chat.call('error', msg)
 				}
+
 				if (msg?._data?.type === 'ciphertext' && (msg.type !== 'chat' && !msg.body)) {
 					msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
 					await this.chat.call('error', msg)
 				}
+				
 				if (msg.body.match(/(pagar|raspar|recargar|gift_card|tarjeta)/gim)) {
 					msg.error_message = loader("BOT_GET_CHAT_PAYMENT_MESSAGE")
 					await this.chat.call('error', msg)
