@@ -30,7 +30,7 @@ class Cache {
                     this.users.delete(username)
                 }
             }
-        })
+        }, { timezone: 'America/Caracas'})
     }
 
     private existHistory (username: string, message: string) {

@@ -44,22 +44,24 @@ export class WhatsAppWebService extends BaseChatService {
     async listen() {
         const service = await this.client.initialize()
         console.log(`*** USING WHATSAPP WEB VERSION ${await this.version} ***`)
-        const centinel = new CentinelWhatsAppWeb(this.chat as any)
-        this.cron(centinel.schedule, async () => await centinel.task())
+        setTimeout(() => {
+            console.log(`*** STARTING CENTINEL ***`)
+            const centinel = new CentinelWhatsAppWeb(this.chat as any)
+            this.cron(centinel.schedule, async () => await centinel.task())
+        }, 5000)
         this.isConnected = true
         return service
     }
 
 
     cron(schedule: string, cb: any): void {
-        const sch = job.schedule(schedule, cb, {
+        job.schedule(schedule, cb, {
             name: 'get-chats',
-            recoverMissedExecutions: true,
+            recoverMissedExecutions: false,
             runOnInit: false,
-            scheduled: false
+            scheduled: true,
+            timezone: 'America/Caracas'
         })
-
-        sch.start()
     }
 
     attachEvents(events: {
