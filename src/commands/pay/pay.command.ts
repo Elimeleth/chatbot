@@ -79,7 +79,7 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
                 },
                 {
                     name: 'contract_number',
-                    condition: (param) => !!(param.match(EXPRESSION_PATTERN.NUMBER_CONTRACT) && param.length >= 4)
+                    condition: (param) => !!(String(param).match(EXPRESSION_PATTERN.NUMBER_CONTRACT) && param.length >= 4)
                 },
                 {
                     name: 'gift_code',
@@ -107,15 +107,21 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
 
         command.form.service_code = service?.service_code
 
+        console.log({
+            form: command.form
+        })
+
         if (!Boolean(service?.pin) && !command.form.amount) {
             assert(false, loader("HOW_PAYMENT"))
         }
-        
+
+        if (!service?.pin && !command.form.contract_number) {
+            assert(false, loader("BOT_ERROR_PAYMENT_NUMBER"))
+        }
         assert(!!Object.keys(command.form).length, loader("HOW_PAYMENT"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
         
-        assert(command.form.contract_number || !!(service?.recharge && !command.form.contract_number.match(EXPRESSION_PATTERN.NUMBER_PHONE)), loader("BOT_ERROR_PAYMENT_NUMBER"))
-
+        
         msg.invalid_data = extra.filter(e => msg.extra.includes(e))
 
         command.call = _pay.call
@@ -159,7 +165,10 @@ export const pay_capture = _pay.pipe(async (_, command) => {
                 value: `${service?.name}`
             }, {
                 key: '[AMOUNT]',
-                value: `${command.form.amount ? command.form.amount + ' Bs.' : 'el monto mínimo del servicio'}`
+                value: service.pin 
+                && service.especial_amount.includes(Number(command.form.amount))
+                 ? `${command.form.amount} ${service.symbol}` 
+                 : `${command.form.amount ? `${command.form.amount} ${service.symbol}` : 'el monto mínimo del servicio'}`
             }, {
                 key: '[CONTRACT_NUMBER]',
                 value: String(command.form.contract_number)

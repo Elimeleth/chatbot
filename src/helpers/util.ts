@@ -113,7 +113,8 @@ export const parse_message_output = (message_to_parse: string, parses: { key: st
 
 export const clean = ( /** @type {string} */ message: string): string => {
   message = message.replace(/(\n|!|\*|_)/g, ' ').trim().toLowerCase()
-  message = message.split(' ').filter((word) => Boolean(word.trim())).join(' ');
+  message = message.split(' ').map(w => String(w)).filter((word) => Boolean(word.trim())).join(' ');
+  
   let sanity_msg /** @type {string} */ = message;
   for (let letter of sanity_msg) {
       if (chars[letter]) {

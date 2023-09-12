@@ -9,6 +9,7 @@ export type Service = {
   pin: boolean;
   hasTemplate: boolean;
   path_media: string|undefined;
+  symbol: string;
   validate_amount: boolean;
   hasConsultFromOperator: boolean;
   hasConsutlFromAmountList: boolean;
