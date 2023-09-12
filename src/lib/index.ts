@@ -60,7 +60,10 @@ export class ChatFactory<T> implements BaseChat<T> {
                 break
             }
         }
-        
+        console.log({
+            commands,
+            command,
+        })
         if (!command) throw new Error(`Key: (${possible_command}) not found`)
 
         command.user_extra_intent = keyOrIntent.replace(possible_command, '').trim()
@@ -178,7 +181,10 @@ export class ChatFactory<T> implements BaseChat<T> {
             username: event.from
         })
 
-        const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(async _ => {
+        const { command, intent } = await this.searchIntentOrFail(clean(input)).catch(async error => {
+            console.log({
+                command_error: error
+            })
             const user = this.history.user(event.from)
             
             if (user)  this.history.save({

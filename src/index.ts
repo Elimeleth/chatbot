@@ -2,7 +2,6 @@ import { activate_afiliate, activate_points, activate_socios, afiliate, balance,
 import { ChatFactory } from "./lib";
 import { WhatsAppWebService, serviceWhatsApp } from "./lib/whatsappWebJs";
 import { EVENTS } from "./lib/whatsappWebJs/triggers";
-import { connect_websocket } from "./services/webSocket";
 
 // [x] Crear loop principal
 // [x] Agregar comandos
@@ -56,7 +55,6 @@ const mainLoop = async () => {
 
     serviceWhatsApp.pipe(chat)
     chat.listen()
-    await connect_websocket();
 }
 
 mainLoop()
