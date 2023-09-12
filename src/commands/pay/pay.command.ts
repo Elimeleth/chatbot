@@ -50,9 +50,12 @@ export const _pay = new Pay('pagar')
 export const pay_pipe = _pay.pipe(async (msg, command, next) => {
 
     try {
-        if ((msg && !msg.extra.length)) {
+        if ((command.captureCommand === 'pagar' && !msg.extra.length)) {
             assert(false, loader("HOW_PAYMENT"))
+        }else if (command.captureCommand === 'raspar' && !command.form.gift_code) {
+            assert(false, loader("HOW_SCRAPE"))
         }
+
         command.form = { phone: msg.phone }
 
         const services_codes = (values: string[]) => {
@@ -103,10 +106,6 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
         }
 
         command.form.service_code = service?.service_code
-
-        if (command.captureCommand === 'raspar' && !command.form.gift_code) {
-            assert(false, loader("HOW_SCRAPE"))
-        }
 
         if (!Boolean(service?.pin) && !command.form.amount) {
             assert(false, loader("HOW_PAYMENT"))

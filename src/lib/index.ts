@@ -50,12 +50,15 @@ export class ChatFactory<T> implements BaseChat<T> {
         const [possible_command, ...rest] = Array.isArray(keyOrIntent) ? keyOrIntent : keyOrIntent.split(' ')
         const command_double = `${possible_command} ${rest[0]}`
         const command_triple = `${possible_command} ${rest[0]} ${rest[1]}`
+        const commands = Array.from(new Set([command_triple, command_double, possible_command].map(c => c.replace(/undefined/gim, '').trim())))
+        let command = null
 
-        const command = this.commands.find(c =>
-            (c.evaluate && c.evaluate(keyOrIntent)) ||
-            ([command_triple, command_double, possible_command].includes(c.key) ||
-                c.intents.some(key => [command_triple, command_double, possible_command].includes(key)))
-        )
+        for (const intent of commands) {
+            if (this.commands.some(c => c.intents.some(key => intent === key))) {
+                command = this.commands.find(c => c.intents.some(key => intent === key))
+                break
+            }
+        }
 
         if (!command) throw new Error(`Key: (${possible_command}) not found`)
 
@@ -238,9 +241,11 @@ export class ChatFactory<T> implements BaseChat<T> {
             assert(!event.invalid_data?.length, loader("INVALID_DATA") + ` *${event.invalid_data ? event.invalid_data.join(',') : ''}*`)
             
             retrieve = await command.call() as unknown as APIResponse
-            assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
             console.log({ retrieve })
+            assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
+            
         } catch (e: any) {
+            console.log(e)
             retrieve = {
                 message: String(e.message).match(/BOT:/gim) ? e.message : loader("BOT_ERROR_FLOW"),
                 status_response: STATUS_RESPONSE_FAILED,
