@@ -50,23 +50,27 @@ export const _pay = new Pay('pagar')
 export const pay_pipe = _pay.pipe(async (msg, command, next) => {
 
     try {
-        if ((command.captureCommand === 'pagar' && !msg.extra.length)) {
+        if (command.captureCommand === 'pagar' && !msg.extra.length) {
             assert(false, loader("HOW_PAYMENT"))
-        }else if (command.captureCommand === 'raspar' && !command.form.gift_code) {
-            assert(false, loader("HOW_SCRAPE"))
-        }
+        } 
 
         command.form = { phone: msg.phone }
 
         const services_codes = (values: string[]) => {
             let service = values.join(' ').match(EXPRESSION_PATTERN.SERVICE_CODE)?.toString() as string
-            service = service ? service.trim() : service
+            
+            service = service ? service.replace(/(,|\.)/gim,'').trim() : service
             if (service && services.some(code => code.names.includes(service.toUpperCase()))) {
                 msg.extra = msg.extra.filter(e => !service.split(' ').includes(e))
                 return services.find(code => code.names.includes(service.toUpperCase()))?.service_code as string
             }
 
             return ''
+        }
+
+        const contract_number = (values: string[]) => {
+            return values.find(v => !!String(v).match(EXPRESSION_PATTERN.NUMBER_CONTRACT) ||
+                !!String(v).match(EXPRESSION_PATTERN.NUMBER_PHONE)) || ''
         }
 
         const { extra, form } = build_form(
@@ -79,7 +83,8 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
                 },
                 {
                     name: 'contract_number',
-                    condition: (param) => !!(String(param).match(EXPRESSION_PATTERN.NUMBER_CONTRACT) && param.length >= 4)
+                    condition_return_value: contract_number,
+                    condition: (param) => !!(String(param).match(EXPRESSION_PATTERN.NUMBER_CONTRACT))
                 },
                 {
                     name: 'gift_code',
@@ -87,7 +92,7 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
                 },
                 {
                     name: 'amount',
-                    condition: (param) => !!(param.match(EXPRESSION_PATTERN.SERVICE_AMOUNT))
+                    condition: (param) => !!(param.match(EXPRESSION_PATTERN.SERVICE_AMOUNT)) && param.length <= 6
                 },
 
             ],
@@ -106,21 +111,22 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
         }
 
         command.form.service_code = service?.service_code
-
-        console.log({
-            form: command.form
-        })
-
+        
         if (!Boolean(service?.pin) && !command.form.amount) {
             assert(false, loader("HOW_PAYMENT"))
         }
 
+        if (command.captureCommand === 'raspar' && !command.form.gift_code) {
+            assert(false, loader("HOW_SCRAPE"))
+        }
+
         if (!service?.pin && !command.form.contract_number) {
-            assert(false, loader("BOT_ERROR_PAYMENT_NUMBER"))
+            assert(false, loader("HOW_PAYMENT"))
         }
         assert(!!Object.keys(command.form).length, loader("HOW_PAYMENT"))
         assert(command.form.service_code && !(!command.form.contract_number && !service?.pin), loader("BOT_ERROR_SERVICE"))
         
+        if (command.form.contract_number) command.form.contract_number = command.form.contract_number.replace(/\D/g, '')
         
         msg.invalid_data = extra.filter(e => msg.extra.includes(e))
 
@@ -157,8 +163,12 @@ export const pay_capture = _pay.pipe(async (_, command) => {
             assert((Number(amount_service) <= Number(max)), loader("BOT_ERROR_PAYMENT_MAX_AMOUNT"))
             assert((Number(amount_service) % Number(multiple) === 0), loader("BOT_ERROR_PAYMENT_MULTIPLE_AMOUNT"))
         }
-        const parse_message = command.form.gift_code ? loader("CONFIRMATION_PAYMENT_WITH_GIFTCARD") : loader("CONFIRMATION_PAYMENT")
+        let parse_message = command.form.gift_code ? loader("CONFIRMATION_PAYMENT_WITH_GIFTCARD") : loader("CONFIRMATION_PAYMENT")
 
+        if (service.pin) {
+            parse_message = command.form.gift_code ? loader("CONFIRMATION_PAYMENT_WITH_GIFTCARD_WITHOUT_CONTRACT_NUMBER") : loader("CONFIRMATION_PAYMENT_WITHOUT_CONTRACT_NUMBER")
+        }
+        
         let message = parse_message_output(parse_message, [
             {
                 key: '[SERVICE]',
@@ -168,7 +178,7 @@ export const pay_capture = _pay.pipe(async (_, command) => {
                 value: service.pin 
                 && service.especial_amount.includes(Number(command.form.amount))
                  ? `${command.form.amount} ${service.symbol}` 
-                 : `${command.form.amount ? `${command.form.amount} ${service.symbol}` : 'el monto mínimo del servicio'}`
+                 : `${command.form.amount ? `${command.form.amount} Bs.` : 'el monto mínimo del servicio'}`
             }, {
                 key: '[CONTRACT_NUMBER]',
                 value: String(command.form.contract_number)

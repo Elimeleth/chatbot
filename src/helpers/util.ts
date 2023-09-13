@@ -69,9 +69,13 @@ export const build_form = (
   
   for (const { name, condition, condition_return_value } of keys) {
       form[name] = condition_return_value ? condition_return_value(extra) : extra.find(condition)
+      if (!form[name]) delete form[name]
   }
 
-  Object.values(form).forEach(param => extra = extra.filter(e => e !== param))
+  Object.values(form).forEach(param => {
+    extra = extra.filter(e => e !== param)
+    param = String(param).trim()
+  })
 
   return {
     form, extra: extra || []
@@ -123,5 +127,5 @@ export const clean = ( /** @type {string} */ message: string): string => {
       }
   }
 
-  return sanity_msg.toLowerCase().replace(/\n/gim, '').trim();
+  return sanity_msg.toLowerCase().replace(/\n/gim, '').trim()
 };
