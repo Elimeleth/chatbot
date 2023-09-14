@@ -100,8 +100,8 @@ export class WhatsAppWebService extends BaseChatService {
     
     async sendContact (phone: string, message: string, contactId: string, messageSendOptions: MessageSendOptions | undefined = {}) {
         const contact = await this.client.getContactById(contactId)
-        this.send(phone, message, messageSendOptions)
-        this.send(phone, contact, messageSendOptions)
+        const ack = await this.send(phone, message, messageSendOptions)
+        if (ack) await this.send(phone, contact, messageSendOptions)
     }
 
     async sendMedia (phone: string, pathFileMedia: string, messageSendOptions: MessageSendOptions | undefined = {}) {

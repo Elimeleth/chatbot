@@ -1,7 +1,7 @@
 import { ClientOptions, LocalAuth, NoAuth } from "whatsapp-web.js";
 import { PUPPETEER_ARGS_FLAGS } from "./puppeteer";
+import { WEB_VERSION } from "./enviroments";
 
-export const WEB_VERSION = '2.2332.15'
 // RUTA DONDE SE MANEJA EL GUARDADO DE SESIONES WORKERS
 // const dataPath: string = './dist/src/.wwebjs_auth';
 

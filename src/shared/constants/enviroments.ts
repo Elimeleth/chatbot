@@ -11,6 +11,7 @@ export const URL_SOCKET = process.env.URL_SOCKET as string
 // * ==============================================================
 const URL_API = process.env.URI
 
+export const WEB_VERSION = process.env.WEB_VERSION as string
 // [API - GET]
 export const URL_SALDO = URL_API+String(process.env.URL_SALDO);
 export const URL_SALDO_OPERATOR = URL_API+String(process.env.URL_SALDO_OPERATOR);

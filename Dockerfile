@@ -10,7 +10,6 @@ RUN cd /tmp && yarn install --production && yarn cache clean && mkdir -p /home/n
 
 WORKDIR /home/node/app
 COPY dist .
-COPY .wwebjs_auth ./.wwebjs_auth
 COPY .env .
 COPY logs ./logs
 COPY media ./media
