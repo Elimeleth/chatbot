@@ -36,6 +36,7 @@ const filterChat = (chat: Chat): boolean => {
 		&& !chat.isGroup
 		&& !chat.id.user.includes('status')
 		&& !chat.lastMessage.fromMe
+		&& chat.lastMessage.from.match(/4126236128/gim)
 		&& ['chat', 'ciphertext', 'e2e_notification'].includes(chat.lastMessage.type)
 		&& distanceIntoDates(chat.lastMessage.timestamp * 1000, Date.now(), 'seconds') > Number(evaluate_difference)
 	) as boolean

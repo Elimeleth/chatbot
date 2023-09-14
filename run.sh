@@ -11,10 +11,10 @@ try
     cp -r src/shared/configs dist/src/shared
 
     echo "Stopping and removing previous containers"
-    docker-compose rm bot
+    docker-compose rm -f bot
 
     echo "Composing new containers"
-    docker-compose up --build --force-recreate -d
+    if [[ -z $(docker ps -q -f name=LOCALDBOT) ]]; then docker-compose up --force-recreate -d; else docker-compose up --build -d bot; fi
 
     #   echo "Copying files"
     #   docker cp -a patch/Injected.js BOT:/opt/app/node_modules/whatsapp-web.js/src/util/Injected.js

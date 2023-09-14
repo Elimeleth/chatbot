@@ -7,7 +7,7 @@ import { BaseCommand } from "../../shared/interfaces/commands";
 class Tutorial extends BaseCommand {
     private command: Command = {
         key: "tutorial",
-        intents: ['tutorial', 'comandos', 'trucos'],
+        intents: ['tutorial', 'comandos', 'trucos', 'comando'],
         action: {
             url: "",
             method: "",

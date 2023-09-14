@@ -9,7 +9,7 @@ import { localDB } from "../../services/localDB";
 class DepositRegister extends BaseCommand {
     private command: Command = {
         key: this._name,
-        intents: ['transferencia', 'pago movil', 'pm', 'registrar deposito'],
+        intents: ['transferencia', 'pago movil', 'pm', 'registrar deposito', 'pagomovil'],
         action: {
             url: URL_DEPOSITAR,
             method: "POST"
@@ -20,7 +20,7 @@ class DepositRegister extends BaseCommand {
 
     call = async () => await httpClient(this.command.action)
 
-    constructor (name: string) {
+    constructor(name: string) {
         super(name)
     }
 
@@ -42,16 +42,20 @@ export const deposit_register_pipe = _depositRegister.pipe(async (msg, command) 
 
     if (!deposit) command.call = async () => await new Promise((resolve, _) => {
         resolve({
-            message: loader("HOW_DEPOSIT"),
+            message: loader("DEPOSITNOTPENDING"),
             status_response: STATUS_RESPONSE_FAILED
         })
     })
+    else {
+        command.form = deposit.payload
+        command.form.type = msg.body.startsWith('transferencia') ? 'TRANSFER' : 'PM'
 
-    command.form = deposit.payload
-    command.form.type = msg.body.startsWith('transferencia') ? 'TRANSFER' : 'PM'
+        command.call = _depositRegister.call
+        
+    }
     
-    command.call = _depositRegister.call
     // @ts-ignore
     await command.deliveryMessage(loader("WAIT_DEPOSIT"))
+
 
 })
