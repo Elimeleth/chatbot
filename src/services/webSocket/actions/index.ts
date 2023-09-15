@@ -6,6 +6,7 @@ const ACTIONS: any = {
     'new_deposit': (data: any) => event_deposit(data),
     'new_banks': (data: any) => event_banks(data),
     'new_message': (data: any) => event_message(data),
+    'service_payment': (data: any) => event_message(data),
     // 'new_message_group': (data: any) => event_tracking(data),
     // 'new_track': (data: any) => event_tracking(data),
     'new_amounts': (data: any) => event_amounts(data),
@@ -16,8 +17,8 @@ const ACTIONS: any = {
 
 export const action = (type: string, data: any) => {
     if (!serviceWhatsApp._isConnected || !ACTIONS[type]) return
-        
     try {
+        if (typeof data === 'string') data = JSON.parse(data);
         return ACTIONS[type](data)
     } catch (error) {
         return null

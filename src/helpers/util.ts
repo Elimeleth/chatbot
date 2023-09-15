@@ -2,6 +2,7 @@ import { httpClient } from "../services/http";
 import { PATH_CONFIGURATIONS } from "../shared/constants/enviroments";
 import { loader } from "./loader";
 
+
 export const sendPrevieWithXClient = async (message: string, phone: string) => {
   return await httpClient({
     url: "https://xclienttech.biyuyo.xyz/event_emit",

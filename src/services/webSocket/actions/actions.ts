@@ -1,5 +1,5 @@
 import { loader } from "../../../helpers/loader";
-import { formData, sendPrevieWithXClient } from "../../../helpers/util";
+import { formData } from "../../../helpers/util";
 import { serviceWhatsApp } from "../../../lib/whatsappWebJs";
 import { PATH_BANKS, PATH_CONFIGURATIONS, PATH_FILE_SERVICES_AMOUNTS, PATH_TICKET_SUPPORT, URL_DEPOSIT_EVENT, URL_MENSAJE_EVENT } from "../../../shared/constants/enviroments";
 import { EXPRESSION_PATTERN } from "../../../shared/constants/patterns";
@@ -61,45 +61,36 @@ export const event_deposit = async (deposits: {
     }
 };
 
-export const event_message = async (msgs: {
-    phone: string[],
-    message: string,
-    scheduled_notifications_id?: string | number
-    link?: boolean,
-    type?: string
-}): Promise<void> => {
+export const event_message = async (msgs: any): Promise<void> => {
+
+    // {
+    //     phone: string[],
+    //     message: string,
+    //     scheduled_notifications_id?: string | number
+    //     link?: boolean,
+    //     type?: string,
+    //     service_payment_id: string | number
+    // }
+    
     try {
+       
         let {
             phone,
             scheduled_notifications_id,
             message,
             link,
-            type
+            type,
+            service_payment_id
         } = msgs;
 
-        const match_attention_vcard = !!message.match(new RegExp(`Escríbenos al siguiente contacto`, 'gim'))
-        const match_url_finded = !!message.match(EXPRESSION_PATTERN.LINK_PREVIEW_VIDEOS)
-
         phone = Array.isArray(phone) ? phone : [phone] // * EVALUAMOS QUE SEA ARRAY
-        phone = phone.filter(p => p.length > 5)
+        // phone = phone.filter((p: string) => p.length > 5)
         const linkPreview = link || true; //* EVALUACION DE LINK PREVIEW EN ENLACES EXTERNOS
 
         logger.info({ info: 'message_event', msgs });
 
         for (const p of phone) {
-            try {
-                if (match_url_finded && !match_attention_vcard && Boolean(Number(loader("USE_XCLIENT_TO_PREVIEW", PATH_CONFIGURATIONS)))) {
-                    const preview = await sendPrevieWithXClient(message, p)
-
-                    if (!preview || !preview.message || !preview?.message?.match(/Evento emitido/gim)) {
-                        throw new Error("not preview send")
-                    }
-                } else {
-                    await serviceWhatsApp.send(`${p}@c.us`, message, { linkPreview });
-                }
-            } catch (_) {
-                await serviceWhatsApp.send(`${p}@c.us`, message, { linkPreview });
-            }
+            await serviceWhatsApp.send(`${p}@c.us`, message, { linkPreview });
 
             if (scheduled_notifications_id) {
                 const { form: formdata } = formData({ scheduled_notifications_id, type });
@@ -109,6 +100,19 @@ export const event_message = async (msgs: {
                     method: 'PUT',
                     data: formdata
                 })
+            }
+
+            if (service_payment_id) {
+                const { form: formdataReceive } = formData({
+                    service_payment_id,
+                    type
+                });
+    
+                await httpClient({
+                    url: URL_DEPOSIT_EVENT,
+                    method: 'PUT',
+                    data: formdataReceive
+                });
             }
 
             logger.info({
