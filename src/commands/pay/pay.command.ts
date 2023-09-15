@@ -1,9 +1,9 @@
 import { service_code, services } from "../../helpers/commands";
 import { loader } from "../../helpers/loader";
-import { build_form, parse_message_output } from "../../helpers/util";
+import { build_form, formData, parse_message_output } from "../../helpers/util";
 import { assert, assertKeysNotNullOrUndefined } from "../../lib/assertions";
 import { httpClient } from "../../services/http";
-import { PATH_FILE_SERVICES_AMOUNTS, URL_PAGAR } from "../../shared/constants/enviroments";
+import { PATH_FILE_SERVICES_AMOUNTS, URL_DEPOSIT_EVENT, URL_PAGAR } from "../../shared/constants/enviroments";
 import { EXPRESSION_PATTERN } from "../../shared/constants/patterns";
 import { ERROR_INVALID_DATA_REACTION, WARNING_REACTION } from "../../shared/constants/reactions";
 import { STATUS_RESPONSE_FAILED } from "../../shared/interfaces/api/fetch-response";
@@ -27,7 +27,23 @@ class Pay extends BaseCommand {
         },
         call: async () => await new Promise((resolve, reject) => resolve(null))
     }
-    call = async () => await httpClient(this.command.action)
+    call = async () => {
+        const retrieved = await httpClient(this.command.action)
+        if (retrieved.id && retrieved.type) {
+			const { form: formdataReceive } = formData({
+				service_payment_id: retrieved.id,
+				type: retrieved.type
+			});
+
+			await httpClient({
+				url: URL_DEPOSIT_EVENT,
+				method: 'POST',
+				data: formdataReceive
+			});
+
+		}
+        return retrieved
+    }
 
     constructor(name: string) {
         super(name)

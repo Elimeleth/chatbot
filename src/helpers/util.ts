@@ -1,6 +1,7 @@
 import { httpClient } from "../services/http";
 import { PATH_CONFIGURATIONS } from "../shared/constants/enviroments";
 import { loader } from "./loader";
+import FormData from "form-data"
 
 
 export const sendPrevieWithXClient = async (message: string, phone: string) => {

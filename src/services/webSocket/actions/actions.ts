@@ -110,7 +110,7 @@ export const event_message = async (msgs: any): Promise<void> => {
     
                 await httpClient({
                     url: URL_DEPOSIT_EVENT,
-                    method: 'PUT',
+                    method: 'POST',
                     data: formdataReceive
                 });
             }

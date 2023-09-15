@@ -242,6 +242,7 @@ export class ChatFactory<T> implements BaseChat<T> {
             assert(!event.invalid_data?.length, loader("INVALID_DATA") + ` *${event.invalid_data ? event.invalid_data.join(',') : ''}*`)
             
             retrieve = await command.call() as unknown as APIResponse
+        
             event.action_api_time = process.hrtime(event.action_api_time)[0]
             console.log({ retrieve })
             assert(!!(retrieve?.message), loader("BOT_ERROR_FLOW"))
