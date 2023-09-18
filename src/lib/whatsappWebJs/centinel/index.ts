@@ -30,12 +30,15 @@ const unreads = async (client: Client) => {
 const filterChat = (chat: Chat): boolean => {
 	const evaluate_difference = loader("GET_CHATS_EVALUATE_DIFF", PATH_CONFIGURATIONS)
 	if (!chat?.lastMessage) return false
+	
 	return (
 		_isToday(chat.timestamp * 1000)
-		&& !Boolean(chat.lastMessage.type !== 'chat')
+		&& Boolean(chat.lastMessage.type === 'chat')
 		&& !chat.isGroup
 		&& !chat.id.user.includes('status')
+		&& !chat.lastMessage.from.includes('@g.us')
 		&& !chat.lastMessage.fromMe
+		&& !chat.lastMessage.hasReaction
 		&& chat.lastMessage.from.match(/4126236128/gim)
 		&& ['chat', 'ciphertext', 'e2e_notification'].includes(chat.lastMessage.type)
 		&& distanceIntoDates(chat.lastMessage.timestamp * 1000, Date.now(), 'seconds') > Number(evaluate_difference)

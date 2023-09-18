@@ -1,8 +1,7 @@
 import { loader } from "../../../helpers/loader";
 import { formData } from "../../../helpers/util";
 import { serviceWhatsApp } from "../../../lib/whatsappWebJs";
-import { PATH_BANKS, PATH_CONFIGURATIONS, PATH_FILE_SERVICES_AMOUNTS, PATH_TICKET_SUPPORT, URL_DEPOSIT_EVENT, URL_MENSAJE_EVENT } from "../../../shared/constants/enviroments";
-import { EXPRESSION_PATTERN } from "../../../shared/constants/patterns";
+import { PATH_BANKS, PATH_FILE_SERVICES_AMOUNTS, PATH_TICKET_SUPPORT, URL_DEPOSIT_EVENT, URL_MENSAJE_EVENT } from "../../../shared/constants/enviroments";
 import { httpClient } from "../../http";
 import { logger } from "../../logs/winston.log";
 import fs from "fs"
