@@ -1,6 +1,6 @@
 import { activate_afiliate, activate_points, activate_socios, afiliate, balance, banks, commands, deposit, deposit_register, error_command, extra_commands, my_deposits, my_payments, my_tickets, pay, pin, points, referred, service_amounts, services, socios, support, welcome } from "./commands";
 import { ChatFactory } from "./lib";
-import { WhatsAppWebService, serviceWhatsApp } from "./lib/whatsappWebJs";
+import { WhatsAppWebService, provider } from "./lib/whatsappWebJs";
 import { EVENTS } from "./lib/whatsappWebJs/triggers";
 
 // [x] Crear loop principal
@@ -17,10 +17,10 @@ import { EVENTS } from "./lib/whatsappWebJs/triggers";
 // [ ] Agregar evaluator
 
 const mainLoop = async () => {
-    serviceWhatsApp.attachEvents(EVENTS)
+    provider.attachEvents(EVENTS)
 
     // * ================================================================
-    const chat = new ChatFactory(serviceWhatsApp.bot_name, serviceWhatsApp)
+    const chat = new ChatFactory(provider.bot_name, provider)
     chat
         .addCommand(afiliate.command).useFunction(afiliate.cb)
         .addCommand(activate_afiliate.command).useFunction(activate_afiliate.cb)
@@ -53,7 +53,7 @@ const mainLoop = async () => {
         .addCommand(error_command.command).useFunction(error_command.cb)
     // * ================================================================
 
-    serviceWhatsApp.pipe(chat)
+    provider.pipe(chat)
     chat.listen()
 }
 

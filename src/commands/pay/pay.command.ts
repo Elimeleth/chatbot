@@ -193,8 +193,8 @@ export const pay_capture = _pay.pipe(async (_, command) => {
                 key: '[AMOUNT]',
                 value: service.pin 
                 && service.especial_amount.includes(Number(command.form.amount))
-                 ? `${command.form.amount} ${service.symbol}` 
-                 : `${command.form.amount ? `${command.form.amount} Bs.` : 'el monto mínimo del servicio'}`
+                 ? `${service.symbol} ${command.form.amount}` 
+                 : `${command.form.amount ? `${service.symbol} ${command.form.amount}` : 'el monto mínimo del servicio'}`
             }, {
                 key: '[CONTRACT_NUMBER]',
                 value: String(command.form.contract_number)

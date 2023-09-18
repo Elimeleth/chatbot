@@ -1,7 +1,7 @@
 import { loader } from "../../../helpers/loader";
 import { formData } from "../../../helpers/util";
-import { serviceWhatsApp } from "../../../lib/whatsappWebJs";
-import { PATH_BANKS, PATH_FILE_SERVICES_AMOUNTS, PATH_TICKET_SUPPORT, URL_DEPOSIT_EVENT, URL_MENSAJE_EVENT } from "../../../shared/constants/enviroments";
+import { provider } from "../../../lib/whatsappWebJs";
+import { PATH_BANKS, PATH_CONFIGURATIONS, PATH_FILE_SERVICES_AMOUNTS, PATH_TICKET_SUPPORT, URL_DEPOSIT_EVENT, URL_MENSAJE_EVENT } from "../../../shared/constants/enviroments";
 import { httpClient } from "../../http";
 import { logger } from "../../logs/winston.log";
 import fs from "fs"
@@ -31,7 +31,7 @@ export const event_deposit = async (deposits: {
 
         logger.info({ info: 'deposit_event', deposits });
 
-        serviceWhatsApp.send(`${phone}@c.us`, message, {});
+        provider.send(`${phone}@c.us`, message, {});
         const formdata = formData({ deposit_id, type });
 
 
@@ -89,7 +89,12 @@ export const event_message = async (msgs: any): Promise<void> => {
         logger.info({ info: 'message_event', msgs });
 
         for (const p of phone) {
-            await serviceWhatsApp.send(`${p}@c.us`, message, { linkPreview });
+            let contact = `${p}@c.us`
+            
+            if (loader('SUPPORT').match(new RegExp(String(message), 'gim'))) {
+                await provider.sendContact(contact, loader("SUPPORT"), loader("SUPPORT_CONTACT", PATH_CONFIGURATIONS))
+            }
+            else await provider.send(contact, message, { linkPreview });
 
             if (scheduled_notifications_id) {
                 const { form: formdata } = formData({ scheduled_notifications_id, type });

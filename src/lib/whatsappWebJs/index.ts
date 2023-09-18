@@ -151,4 +151,4 @@ export class WhatsAppWebService extends BaseChatService {
     }
 }
 
-export const serviceWhatsApp = new WhatsAppWebService('Biyuyo Bot').daemon()
+export const provider = new WhatsAppWebService('Biyuyo Bot').daemon()
