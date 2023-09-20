@@ -127,13 +127,14 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
         }
 
         command.form.service_code = service?.service_code
-        
-        if (!Boolean(service?.pin) && !command.form.amount) {
-            assert(false, loader("HOW_PAYMENT"))
-        }
 
         if (command.captureCommand === 'raspar' && !command.form.gift_code) {
             assert(false, loader("HOW_SCRAPE"))
+        }
+
+        
+        if (!Boolean(service?.pin) && !command.form.amount) {
+            assert(false, loader("HOW_PAYMENT"))
         }
 
         if (!service?.pin && !command.form.contract_number) {

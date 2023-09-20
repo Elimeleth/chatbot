@@ -3,6 +3,7 @@ config()
 
 export const NODE_ENV = process.env.NODE_ENV
 export const EVENT = process.env.NODE_ENV === "production" ? 'production' : 'test'
+export const TELEGRAM_API_BOT = process.env.TELEGRAM_API_BOT as string
 
 // *=================================================
 export const URL_GNFILES = process.env.URL_GNFILES as string

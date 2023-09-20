@@ -2,7 +2,6 @@ import { distanceIntoDates } from "../../helpers/date";
 import { loader } from "../../helpers/loader";
 import { PATH_CONFIGURATIONS, PATH_USER_HISTORY } from "../../shared/constants/enviroments";
 import { CacheHistory } from "../../shared/interfaces/chat";
-import fs from "fs"
 import * as job from "node-cron"
 
 class Cache {
@@ -49,7 +48,6 @@ class Cache {
 
     save(payload: Partial<CacheHistory>) {
         if (!payload.username) return
-        // let history = this.history || []
 
         const user = this.users.get(payload.username) || null
 
@@ -65,9 +63,6 @@ class Cache {
             payload.error_count = 0
         }
         this.users.set(payload.username as string, payload)
-        // history = history.filter(hst => hst.username !== payload.username)
-        // history.push(payload)
-        // fs.writeFileSync(PATH_USER_HISTORY as string, JSON.stringify(history, undefined, 1))
     }
 }
 

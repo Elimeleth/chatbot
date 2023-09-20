@@ -1,5 +1,8 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { APIResponse } from '../../shared/interfaces/api/fetch-response';
+import { loader } from '../../helpers/loader';
+import { PATH_CONFIGURATIONS } from '../../shared/constants/enviroments';
+import { logger } from '../logs/winston.log';
 
 const data_failed: APIResponse = {
 	message: 'Si no tiene respuesta, vuelva a intentar en otro momento, disculpe las molestias ocasionadas.',
@@ -15,14 +18,17 @@ export const httpClient = async (fetchOpts: AxiosRequestConfig): Promise<any> =>
 			...fetchOpts,
 			headers: {
 				sign: 'biyuyo_whatsapp',
+				'X-SESSION-WHATSAPP': loader('SESSION', PATH_CONFIGURATIONS),
 				...fetchOpts.headers,
 			},
 			signal: controller.signal,
 			cancelToken: axios.CancelToken.source().token
 		});
 		endFetchTime = process.hrtime(start)[0]
+		logger.debug({ info: 'Fetch http', data })
 		return data
 	} catch (error: any) {
+		logger.error({ info: 'Error fetching data', error: error })
 		endFetchTime = process.hrtime(start)[0] 
 
 		if (axios.isCancel(error)) {

@@ -75,7 +75,7 @@ export const deposit_pipe = _deposit.pipe(async (msg, command, next) => {
                 },
                 {
                     name: 'bank_reference',
-                    condition: (param, idx) => !!(idx === 1 && param.match(EXPRESSION_PATTERN.NUMBER_CONTRACT) && param.length >= 4)
+                    condition: (param, idx) => !!(idx === 1 && param.match(EXPRESSION_PATTERN.BANK_REFERENCE) && param.length >= 4)
                 },
                 {
                     name: 'amount',
