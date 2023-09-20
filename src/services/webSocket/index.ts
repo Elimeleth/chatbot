@@ -15,8 +15,8 @@ class XClientConnection {
             console.log('ATTEMPT XCLIENT RECONNECT', attempt);
         });
     
-        ws.io.on('reconnect', (error) => {
-            console.log('RECONNECT ERROR', error);
+        ws.io.on('reconnect', (attempt) => {
+            console.log('ATTEMPT RECONNECT ERROR', attempt);
         });
     
         // client-side

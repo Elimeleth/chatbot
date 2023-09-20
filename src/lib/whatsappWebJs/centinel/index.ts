@@ -30,7 +30,7 @@ const unreads = async (client: Client) => {
 const filterChat = (chat: Chat): boolean => {
 	const evaluate_difference = loader("GET_CHATS_EVALUATE_DIFF", PATH_CONFIGURATIONS)
 	if (!chat?.lastMessage) return false
-	
+
 	return (
 		_isToday(chat.timestamp * 1000)
 		&& Boolean(chat.lastMessage.type === 'chat')
@@ -59,21 +59,32 @@ const fetch_messages = async (chat: Chat) => {
 export class CentinelWhatsAppWeb<T>  {
 	schedule = loader("GET_CHATS_CRON_TIME_SECONDS", PATH_CONFIGURATIONS)
 	isReading = false
-	
+
 	constructor(private chat: ChatFactory<T>) { }
 
-	async task() {	
+	async task() {
 		if (this.isReading) return
 		const chats = await unreads(this.chat.client)
-		
+
 		this.isReading = true
-		
+
 		if (chats.length > 0) {
 			logger.info({ info: 'unreads chats', count: chats.length })
 			delay(500)
 			for (const chat of chats) {
 				const msg = await fetch_messages(chat) as any
-				
+
+				// @ts-ignore
+				msg.phone = msg.from.split("@")[0]
+				// @ts-ignore
+				msg.action_bot_time = process.hrtime([distanceIntoDates(msg.timestamp * 1000, Date.now(), 'seconds'), '0'])
+				// @ts-ignore
+				msg.action_api_time = process.hrtime()
+				// @ts-ignore
+				msg.timedelta = timedelta(msg.timestamp)
+				// @ts-ignore
+				msg.haveTicketSupport = create_ticket_support.haveTicket(msg.phone)
+
 				delay(500)
 				if ((msg?._data?.type === 'ciphertext' && msg?._data?.subtype === "fanout") && (msg.type !== 'chat' && !msg.body)) {
 					msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
@@ -84,7 +95,7 @@ export class CentinelWhatsAppWeb<T>  {
 					msg.error_message = loader("BOT_GET_CHAT_CIPHERTEXT_MESSAGE")
 					await this.chat.call('error', msg)
 				}
-				
+
 				if (msg.body.match(/(pagar|raspar|recargar|gift_card|tarjeta)/gim)) {
 					msg.error_message = loader("BOT_GET_CHAT_PAYMENT_MESSAGE")
 					await this.chat.call('error', msg)
@@ -93,18 +104,19 @@ export class CentinelWhatsAppWeb<T>  {
 					await this.chat.call(msg.body, msg)
 				}
 
-				logger.info({ 
-					info: 'get_chats', 
+				logger.info({
+					info: 'get_chats',
 					diff: distanceIntoDates(chat.lastMessage.timestamp * 1000, Date.now(), 'seconds'),
-					msg })
+					msg
+				})
 
 				cache.save({
 					username: msg.from,
 					last_message: undefined,
 					last_timestamp: undefined
 				})
-				
-				
+
+
 			}
 
 		}

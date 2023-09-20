@@ -51,6 +51,7 @@ export type ExtraMessage = {
     action_api_time: number;
     haveTicketSupport: boolean;
     error_message?: string;
+    timedelta: number;
     invalid_data?: string[];
 }
 

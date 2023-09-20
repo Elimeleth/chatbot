@@ -38,6 +38,7 @@ class Pay extends BaseCommand {
 			await httpClient({
 				url: URL_DEPOSIT_EVENT,
 				method: 'POST',
+                headers: this.command.action.headers,
 				data: formdataReceive
 			});
 
@@ -146,7 +147,7 @@ export const pay_pipe = _pay.pipe(async (msg, command, next) => {
         if (command.form.contract_number) command.form.contract_number = command.form.contract_number.replace(/\D/g, '')
         
         msg.invalid_data = extra.filter(e => msg.extra.includes(e))
-
+        command.action.headers = { 'X-TIMEDELTA-WHATSAPP': msg.timedelta }
         command.call = _pay.call
         next()
     } catch (e: any) {

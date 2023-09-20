@@ -2,7 +2,7 @@ import { Message } from "whatsapp-web.js";
 import { PipeChat } from "../../../../shared/interfaces/chat";
 import { logger } from "../../../../services/logs/winston.log";
 import { create_ticket_support } from "../../../../services/ticket";
-import { distanceIntoDates } from "../../../../helpers/date";
+import { distanceIntoDates, timedelta } from "../../../../helpers/date";
 
 const filterMessage = (msg: Message): boolean => !!(
     msg.fromMe ||
@@ -25,6 +25,8 @@ export const message = {
         msg.action_bot_time = process.hrtime([distanceIntoDates(msg.timestamp * 1000, Date.now(), 'seconds'), '0'])
         // @ts-ignore
         msg.action_api_time = process.hrtime()
+        // @ts-ignore
+        msg.timedelta = timedelta(msg.timestamp)
         // @ts-ignore
         msg.haveTicketSupport = create_ticket_support.haveTicket(msg.phone)
         if (chat) chat.call(msg.body, msg)

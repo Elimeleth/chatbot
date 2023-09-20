@@ -3,7 +3,6 @@ import { PATH_CONFIGURATIONS, TELEGRAM_API_BOT } from "../../shared/constants/en
 import { loader } from "../../helpers/loader"
 import { logger } from "../logs/winston.log"
 import { provider } from "../../lib/whatsappWebJs"
-import { assert } from "console"
 
 class TelegramChannelService {
     service!: Telegraf
@@ -11,26 +10,15 @@ class TelegramChannelService {
 
     constructor(private token: string) {
         this.service = new Telegraf(this.token)
-        this.service.use((ctx, next) => {
-            
-            if (ctx.message?.is_topic_message) {
-                // @ts-ignore
-                ctx.message.topic_name = ctx.message.reply_to_message.forum_topic_created.name
-                // @ts-ignore
-                ctx.message.topic_message = ctx.message.text
-            }
-
-            next();
-        })
-
         this.handleError();
     }
 
     private handleError () {
         this.service.catch((error, ctx) => {
+            console.log('error catch', { error })
             logger.error({ info: 'Telegram Error', error })
 
-            console.log({ ctx: ctx.update })
+            console.log({ ctx: JSON.stringify(ctx.message, undefined, 1) })
         })
     }
 
@@ -50,24 +38,56 @@ class TelegramChannelService {
         }
     }
 
-    async send (to: string, message: any) {
+    async send (to: string, message: any, options: any) {
         if (!provider._isConnected) return
-        return await provider.send(to, message)
+    
+        if (options?.media_url)  {
+            return await provider.sendMedia(to, options.media_url, {
+                caption: message,
+                sendAudioAsVoice: options.is_voice || false
+            })
+        }
+
+        return await provider.send(to, message, options)
+    }
+
+    private middleware () {
+        this.service.use( async (ctx: any, next) => {
+            
+            if (ctx.message?.is_topic_message) {
+                if (ctx.message.photo || ctx.message.voice) {
+                    const file_id = ctx.message.photo ? 
+                        ctx.message.photo[ctx.message.photo.length - 1].file_id : ctx.message.voice.file_id;
+                    
+                    const media = await this.service.telegram.getFileLink(file_id)
+    
+                    ctx.message.media_url = media.href
+                    ctx.message.is_voice = Boolean(ctx.message?.voice)
+                }
+
+                ctx.message.topic_name = ctx.message.reply_to_message.forum_topic_created.name
+                ctx.message.topic_message = ctx.message.text
+            }
+
+            next();
+        })
+
     }
 
     private async hear() {
-        this.service.on('message', async (ctx) => {
-            console.log('message', { ctx: ctx.message })
-            // @ts-ignore
-            if (ctx.message.text && ctx.message.text.match(/(salir|close|cerrar|terminar)/gim)) {
-                // @ts-ignore
-                this.delete_topic(ctx.message.message_thread_id)
-            }
-            // @ts-ignore
-            if (ctx.message.topic_name) {
-                // @ts-ignore
-                // return await this.send(`${ctx.message.topic_name}@c.us`, ctx.message.topic_message)
-            }
+        this.service.on('message', async (ctx: any) => {
+            console.log('message', JSON.stringify(ctx.message, undefined, 1))
+        
+            // if (ctx.message.text && ctx.message.text.match(/(salir|close|cerrar|terminar)/gim)) {
+            //     this.delete_topic(ctx.message.message_thread_id)
+            // }
+            
+            // if (ctx.message.topic_name) {
+            //     return await this.send(`${ctx.message.topic_name}@c.us`, ctx.message.topic_message, {
+            //         media_url: ctx.message?.media_url,
+            //         is_voice: ctx.message?.is_voice
+            //     })
+            // }
         })
     }
 
@@ -97,6 +117,7 @@ class TelegramChannelService {
 
     async run() {
         try {
+            this.middleware()
             this.hear()
             // this.action()
             console.log('*** TELEGRAM CHANNEL RUNNING ***')

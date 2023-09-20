@@ -107,12 +107,18 @@ export class WhatsAppWebService extends BaseChatService {
     }
 
     async sendMedia (phone: string, pathFileMedia: string, messageSendOptions: MessageSendOptions | undefined = {}) {
-        const media = MessageMedia.fromFilePath(pathFileMedia)
+        const media = pathFileMedia.match(/(http|https)/gim) ? 
+        await MessageMedia.fromUrl(pathFileMedia, {
+            unsafeMime: true
+        }) 
+        : MessageMedia.fromFilePath(pathFileMedia)
+        
         return this.send(phone, media, messageSendOptions)
     }
 
     async send(to: string, message: MessageContent, messageSendOptions: MessageSendOptions | undefined = {}) {
-        assert(to.includes("@c.us"), "to must include @c.us")
+        assert(to.includes("@c.us"), "phone must include @c.us")
+        assert(Boolean(this.client.getNumberId(to)), 'WhatsApp number not exist')
         
         await delay(150)
         await this.client.sendPresenceAvailable()
