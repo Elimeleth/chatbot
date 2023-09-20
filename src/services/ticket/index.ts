@@ -4,6 +4,8 @@ import { PATH_CONFIGURATIONS, PATH_TICKET_SUPPORT, URL_GNFILES, URL_TICKET_SOPOR
 import { httpClient } from "../http"
 import { logger } from "../logs/winston.log"
 import fs from "fs"
+import { telegram_channel } from "../telegram"
+import { randomBytes, randomInt } from "crypto"
 type Multimedia = {
     data: string,
     mimetype: string,
@@ -18,8 +20,8 @@ class TicketSupport {
         return !!(ticket.some(t => t.phone === phone ))
     }
 
-    private async download_file(multimedia: Multimedia) {
-        const media_data_response = await httpClient({
+    private async push_file(multimedia: Multimedia) {
+        const media = await httpClient({
             url: URL_GNFILES,
             method: "POST",
             headers: {
@@ -29,18 +31,29 @@ class TicketSupport {
                 base64: `data:${multimedia.mimetype};base64,${multimedia.data}`,
                 fileName: String(multimedia.id),
                 folderName: loader("FOLDER_NAME_WHATSAPP", PATH_CONFIGURATIONS)
-            }).form
+            })
         })
         
-        if (media_data_response.code && [200, 201].includes(media_data_response.code)) {
-            return media_data_response.url
+        if (media.code && [200, 201].includes(media.code)) {
+            return media.url
         }
 
         return null
     }
 
     async create (form: any, multimedia?: Multimedia|undefined) {
-        if (multimedia) form.image_url = await this.download_file(multimedia)
+        if (multimedia) form.image_url = await this.push_file(multimedia)
+        
+        await telegram_channel.manage_topic(form.phone)
+        await telegram_channel.send({
+            message: form.message,
+            topic: form.phone,
+            type: form.image_url ? form.image_url.match(/extension=(ogg|opus|mp3)/gim) ? 'audio' : 'image' : 'text',
+            content: {
+                url: form.image_url,
+                filename: String(randomInt(10))
+            }
+        })
         
         const ticket = await httpClient({
             url: URL_TICKET_SOPORTE,

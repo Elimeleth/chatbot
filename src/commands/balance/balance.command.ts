@@ -96,11 +96,7 @@ export const balance_pipe = _balance.pipe(async (msg, command) => {
                 msg.extra
             )
             command.form = form
-
-
-            console.log({
-                form
-            })
+            
             const service = service_code((code) => code.service_code === command.form.service_code) as Service
             assertKeysNotNullOrUndefined(command.form, ['service_code', 'gift_code'], true)
             if (!command.form.gift_code) {

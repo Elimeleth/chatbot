@@ -15,7 +15,6 @@ import { PATH_CONFIGURATIONS } from "../shared/constants/enviroments";
 import { Chain } from "../services/chain";
 import { create_ticket_support } from "../services/ticket";
 import { logger } from "../services/logs/winston.log";
-import { telegra_channel } from "../services/telegram";
 
 export class ChatFactory<T> implements BaseChat<T> {
     private commands: Command[] = [];
@@ -185,11 +184,10 @@ export class ChatFactory<T> implements BaseChat<T> {
                             ...user,
                             error_count: user.error_count + 1
                         })
-            if (user && user.error_count >= 3) await create_ticket_support.create({ phone: event.from.split('@')[0], message: event.body })
+            // if (user && user.error_count >= 3) 
+            await create_ticket_support.create({ phone: event.phone, message: `ID: ${event.id._serialized}\n\nMensaje:\n${event.body}` })
            
             this.supportVcard(event)
-
-            // telegra_channel.create_topic(event.phone)
             return { command: null, intent: null }
         }) as { command: Command, intent: RegExpMatchArray | null }
         

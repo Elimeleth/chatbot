@@ -10,7 +10,7 @@ import { httpClient } from "../../services/http";
 import { PATH_CONFIGURATIONS, URL_ACTIVE_PROMOTIONS } from "../../shared/constants/enviroments";
 import { loader } from "../../helpers/loader";
 import { connect_websocket } from "../../services/webSocket";
-import { telegra_channel } from "../../services/telegram";
+import { telegram_channel } from "../../services/telegram";
 
 
 export class WhatsAppWebService extends BaseChatService {
@@ -50,7 +50,7 @@ export class WhatsAppWebService extends BaseChatService {
             console.log(`*** STARTING CENTINEL ***`)
             const centinel = new CentinelWhatsAppWeb(this.chat as any)
             this.cron(centinel.schedule, async () => await centinel.task())
-            telegra_channel.run()
+            telegram_channel.run()
             
         }, 5000)
         this.isConnected = true

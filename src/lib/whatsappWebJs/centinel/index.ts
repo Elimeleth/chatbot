@@ -39,7 +39,7 @@ const filterChat = (chat: Chat): boolean => {
 		&& !chat.lastMessage.from.includes('@g.us')
 		&& !chat.lastMessage.fromMe
 		&& !chat.lastMessage.hasReaction
-		&& chat.lastMessage.from.match(/4126236128/gim)
+		&& chat.lastMessage.from.match(/(4126236128|4124964540)/gim)
 		&& ['chat', 'ciphertext', 'e2e_notification'].includes(chat.lastMessage.type)
 		&& distanceIntoDates(chat.lastMessage.timestamp * 1000, Date.now(), 'seconds') > Number(evaluate_difference)
 	) as boolean

@@ -30,7 +30,7 @@ class Pay extends BaseCommand {
     call = async () => {
         const retrieved = await httpClient(this.command.action)
         if (retrieved.id && retrieved.type) {
-			const { form: formdataReceive } = formData({
+			const formdataReceive = formData({
 				service_payment_id: retrieved.id,
 				type: retrieved.type
 			});

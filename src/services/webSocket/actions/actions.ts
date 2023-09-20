@@ -97,7 +97,7 @@ export const event_message = async (msgs: any): Promise<void> => {
             else await provider.send(contact, message, { linkPreview });
 
             if (scheduled_notifications_id) {
-                const { form: formdata } = formData({ scheduled_notifications_id, type });
+                const formdata = formData({ scheduled_notifications_id, type });
 
                 await httpClient({
                     url: URL_MENSAJE_EVENT, 
@@ -107,7 +107,7 @@ export const event_message = async (msgs: any): Promise<void> => {
             }
 
             if (service_payment_id) {
-                const { form: formdataReceive } = formData({
+                const formdataReceive = formData({
                     service_payment_id,
                     type
                 });

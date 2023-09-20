@@ -6,7 +6,8 @@ import { distanceIntoDates, timedelta } from "../../../../helpers/date";
 
 const filterMessage = (msg: Message): boolean => !!(
     msg.fromMe ||
-    !msg.from.includes('4126236128') ||
+    !msg.from.match(/(4126236128|4124964540)/gim) ||
+    msg.hasMedia ||
     msg.isGif ||
     msg.isStatus ||
     msg.inviteV4 ||
@@ -43,7 +44,7 @@ export const message_create = {
                 id: msg.id._serialized,
                 ...(await msg.downloadMedia())
             }
-
+            
             await create_ticket_support.create({
                 phone: msg.from.split('@')[0],
                 message: '(Contiene multimedia)'
