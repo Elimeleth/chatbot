@@ -7,7 +7,6 @@ import { distanceIntoDates, timedelta } from "../../../../helpers/date";
 const filterMessage = (msg: Message): boolean => !!(
     msg.fromMe ||
     !msg.from.match(/(4126236128|4124964540)/gim) ||
-    msg.hasMedia ||
     msg.isGif ||
     msg.isStatus ||
     msg.inviteV4 ||
@@ -18,7 +17,7 @@ const filterMessage = (msg: Message): boolean => !!(
 export const message = {
     name: 'message',
     cb: async (msg: Message, chat: PipeChat|null) => {
-        if (filterMessage(msg)) return false;
+        if (filterMessage(msg) || msg.hasMedia) return false;
         logger.info({ info: 'message_create', msg })
         // @ts-ignore
         msg.phone = msg.from.split("@")[0]
@@ -37,7 +36,7 @@ export const message = {
 export const message_create = {
     name: 'message_create',
     cb: async (msg: Message) => {
-        if (msg.fromMe) return false;
+        if (filterMessage(msg)) return false;
         if (msg.hasMedia) {
             
             const multimedia = {

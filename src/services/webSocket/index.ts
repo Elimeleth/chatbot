@@ -1,10 +1,7 @@
 // CONEXION SOCKET 
-import { io, Socket } from "socket.io-client";
-import { Client, Events, MessageMedia } from "whatsapp-web.js";
-import { EVENT, PATH_CONFIGURATIONS, URL_SOCKET } from "../../shared/constants/enviroments";
+import { io } from "socket.io-client";
+import { EVENT, URL_SOCKET } from "../../shared/constants/enviroments";
 import { action } from "./actions";
-import { loader } from "../../helpers/loader";
-import { logger } from "../logs/winston.log";
 
 // *RETORNA ESTATUS DE CONEXION EN CASO DE ALGUNA EVENTUALIDAD EN WS
 class XClientConnection {
@@ -65,10 +62,6 @@ export const connect_websocket: any = (): void => {
      */
     
     connection.on(EVENT, async(data : any, type: any) => {
-        if (!data['session'] || data['session'].toLowerCase() !== loader('SESSION', PATH_CONFIGURATIONS).toLowerCase()) {
-            logger.debug({ message: "event not emited", type, data})
-            return false;
-        }
         return action(type, data)
     });
 };

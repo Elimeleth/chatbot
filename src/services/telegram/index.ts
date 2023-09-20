@@ -123,6 +123,10 @@ class TelegramChannelService {
 
     private async hear() {
         this.service.on('message', async (ctx: any) => {
+            if (ctx.message.text && ctx.message.text.match(/id/gim)) {
+                return ctx.reply(String(ctx.message.chat.id))
+            }
+
             if (ctx.message.text && ctx.message.text.match(/(salir|close|cerrar|terminar)/gim)) {
                 return this.delete_topic(ctx.message.message_thread_id)
             }
@@ -144,12 +148,6 @@ class TelegramChannelService {
         })
     }
 
-    private command() {
-        this.service.command('id', (ctx) => {
-            return ctx.reply(String(ctx.chat.id))
-        })
-    }
-
     async manage_topic(phone_id: string, delete_topic: boolean = false) {
         if (this.topics.has(phone_id)) {
             if (delete_topic) this.delete_topic(Number(this.topics.get(phone_id)));
@@ -164,11 +162,11 @@ class TelegramChannelService {
 
             const topic = await this.service.telegram.createForumTopic(this.forum_id, phone_id)
             this.topics.set(topic.name, topic.message_thread_id)
-            this.send({
-                topic: topic.name,
-                message: 'Historial de mensajes:\n\n'+cache.user(`${phone_id}@c.us`).history.join('\n\n'),
-                type: 'text'
-            })
+            if (cache.user(`${phone_id}@c.us`).history.length) this.send({
+                    topic: topic.name,
+                    message: 'Historial de mensajes:\n\n'+cache.user(`${phone_id}@c.us`).history.join('\n\n'),
+                    type: 'text'
+                })
             this.alert_new_topic(
                 `NUEVO TICKET CREADO!\n\n User: **${phone_id}**`,
                 link.invite_link
@@ -186,7 +184,6 @@ class TelegramChannelService {
         try {
             this.middleware()
             this.hear()
-            this.command()
             console.log('*** TELEGRAM CHANNEL RUNNING ***')
 
             await this.service.launch()
