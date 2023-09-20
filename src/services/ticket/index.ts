@@ -1,11 +1,12 @@
 import { loader } from "../../helpers/loader"
 import { formData } from "../../helpers/util"
-import { PATH_CONFIGURATIONS, PATH_TICKET_SUPPORT, URL_GNFILES, URL_TICKET_SOPORTE } from "../../shared/constants/enviroments"
+import { PATH_CONFIGURATIONS, PATH_TICKET_SUPPORT, URL_GNFILES, URL_HAS_TICKET_SUPPORT, URL_TICKET_SOPORTE } from "../../shared/constants/enviroments"
 import { httpClient } from "../http"
 import { logger } from "../logs/winston.log"
 import fs from "fs"
 import { telegram_channel } from "../telegram"
 import { randomBytes, randomInt } from "crypto"
+import { TICKET_SUPPORT_OPEN } from "../../shared/constants/api"
 type Multimedia = {
     data: string,
     mimetype: string,
@@ -13,11 +14,12 @@ type Multimedia = {
 }
 class TicketSupport {
 
-    haveTicket (phone: string) {
-        const ticket: { phone: string, status: string}[] = loader(null, PATH_TICKET_SUPPORT) || []
+    async haveTicket (phone: string) {
+        const hasTicket = await httpClient({
+            url: URL_HAS_TICKET_SUPPORT+phone,
+        })
 
-        if (!ticket.length) return false
-        return !!(ticket.some(t => t.phone === phone ))
+        return !!(hasTicket.message === TICKET_SUPPORT_OPEN)
     }
 
     private async push_file(multimedia: Multimedia) {
@@ -54,7 +56,7 @@ class TicketSupport {
                 filename: String(randomInt(10))
             }
         })
-        
+
         const ticket = await httpClient({
             url: URL_TICKET_SOPORTE,
             method: 'POST',

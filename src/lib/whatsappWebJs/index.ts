@@ -120,7 +120,6 @@ export class WhatsAppWebService extends BaseChatService {
         assert(to.includes("@c.us"), "phone must include @c.us")
         assert(Boolean(this.client.getNumberId(to)), 'WhatsApp number not exist')
         
-        await delay(150)
         await this.client.sendPresenceAvailable()
         await this.status('typing', to)
 

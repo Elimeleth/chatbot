@@ -56,11 +56,12 @@ class Cache {
             payload.prev_message_bot = user.last_message_bot
             payload.prev_timestamp_bot = user.last_timestamp_bot
             payload.prev_timestamp = user.last_timestamp
-            
+            payload.history = [...user.history, user.last_message].filter(t => Boolean(t)).flat().slice(-5)
             payload = Object.assign(user, payload)
             
         }else {
             payload.error_count = 0
+            payload.history = [user.last_message]
         }
         this.users.set(payload.username as string, payload)
     }

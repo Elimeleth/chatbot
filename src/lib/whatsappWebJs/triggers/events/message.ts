@@ -47,7 +47,7 @@ export const message_create = {
             
             await create_ticket_support.create({
                 phone: msg.from.split('@')[0],
-                message: '(Contiene multimedia)'
+                message: msg.body || '(Contiene multimedia)'
             }, multimedia)
         }
     }

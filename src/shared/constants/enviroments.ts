@@ -31,6 +31,7 @@ export const URL_AFILIAR = URL_API+String(process.env.URL_AFILIAR)
 export const URL_ACTIVAR = URL_API+String(process.env.URL_ACTIVAR)
 export const URL_PROGRAMAR_PAGO = URL_API+String(process.env.URL_PROGRAMAR_PAGO)
 export const URL_TICKET_SOPORTE = URL_API+String(process.env.URL_TICKET_SOPORTE)
+export const URL_HAS_TICKET_SUPPORT = URL_API+String(process.env.URL_HAS_TICKET_SUPPORT)
 export const URL_PROMOCION = URL_API+String(process.env.URL_PROMOCION)
 export const URL_ALERTA_TELEGRAM = URL_API+String(process.env.URL_ALERTA_TELEGRAM)
 

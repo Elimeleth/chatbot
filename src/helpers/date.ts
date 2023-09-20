@@ -6,7 +6,6 @@ export const timedelta = (timestamp: number) => {
     const desiredOffset = -300; // Time difference between desired timezone and UTC in minutes (e.g. -300 for EST)
     const timeDiff = localOffset * 60 * 1000; // Time difference between timestamp and desired timezone in milliseconds
     const timedelta = new Date(date.getTime() - timeDiff)
-    console.log({ timedelta })
 
     return timedelta
 }

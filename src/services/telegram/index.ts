@@ -3,6 +3,7 @@ import { PATH_CONFIGURATIONS, TELEGRAM_API_BOT } from "../../shared/constants/en
 import { loader } from "../../helpers/loader"
 import { logger } from "../logs/winston.log"
 import { provider } from "../../lib/whatsappWebJs"
+import { cache } from "../cache/history-cache"
 
 class TelegramChannelService {
     service!: Telegraf
@@ -16,7 +17,6 @@ class TelegramChannelService {
 
     private handleError() {
         this.service.catch((error, _) => {
-            console.log({ error_telegram: error })
             logger.error({ info: 'Telegram Error', error })
         })
     }
@@ -33,6 +33,8 @@ class TelegramChannelService {
                         inline_keyboard: [
                             [{ text: 'Atender', url: invite_link }]
                         ],
+                        remove_keyboard: true,
+                        one_time_keyboard: true
                     },
                 })
             } catch (error) {
@@ -45,23 +47,26 @@ class TelegramChannelService {
         type: 'audio' | 'text' | 'image',
         topic: string,
         message: string,
-        content: {
+        content?: {
             url: string,
             filename: string,
         }
     }) {
         const { type, content, message, topic } = args
+        
         if (!this.topics.has(topic)) return
-
+        
         try {
             const message_thread_id = this.topics.get(topic)
             switch (type) {
                 case 'audio':
+                    // @ts-ignore
                     return await this.service.telegram.sendAudio(this.forum_id, content, {
                         message_thread_id,
                         caption: message
                     })
                 case 'image':
+                    // @ts-ignore
                     return await this.service.telegram.sendPhoto(this.forum_id, content, {
                         message_thread_id,
                         caption: message
@@ -118,10 +123,8 @@ class TelegramChannelService {
 
     private async hear() {
         this.service.on('message', async (ctx: any) => {
-            console.log('message', JSON.stringify(ctx.message, undefined, 1))
-
             if (ctx.message.text && ctx.message.text.match(/(salir|close|cerrar|terminar)/gim)) {
-                this.delete_topic(ctx.message.message_thread_id)
+                return this.delete_topic(ctx.message.message_thread_id)
             }
 
             if (ctx.message.topic_name) {
@@ -141,6 +144,12 @@ class TelegramChannelService {
         })
     }
 
+    private command() {
+        this.service.command('id', (ctx) => {
+            return ctx.reply(String(ctx.chat.id))
+        })
+    }
+
     async manage_topic(phone_id: string, delete_topic: boolean = false) {
         if (this.topics.has(phone_id)) {
             if (delete_topic) this.delete_topic(Number(this.topics.get(phone_id)));
@@ -155,6 +164,11 @@ class TelegramChannelService {
 
             const topic = await this.service.telegram.createForumTopic(this.forum_id, phone_id)
             this.topics.set(topic.name, topic.message_thread_id)
+            this.send({
+                topic: topic.name,
+                message: 'Historial de mensajes:\n\n'+cache.user(`${phone_id}@c.us`).history.join('\n\n'),
+                type: 'text'
+            })
             this.alert_new_topic(
                 `NUEVO TICKET CREADO!\n\n User: **${phone_id}**`,
                 link.invite_link
@@ -172,7 +186,7 @@ class TelegramChannelService {
         try {
             this.middleware()
             this.hear()
-            // this.action()
+            this.command()
             console.log('*** TELEGRAM CHANNEL RUNNING ***')
 
             await this.service.launch()
